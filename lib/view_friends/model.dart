@@ -13,13 +13,44 @@ class UserListModel extends ChangeNotifier {
 
   void add(User item) {
     _items.add(item);
-    // This call tells the widgets that are listening to this model to rebuild.
     notifyListeners();
+  }
+
+  void update(List<User> updatedList) {
+    List<int> indexes = [];
+    List<User> new_users = [];
+    var changed = false;
+    //check current list for unexisting users
+    for (var i = 0; i < _items.length; i++) {
+      if (updatedList
+              .indexWhere((element) => (element.compareTo(_items[i]) == 0)) <
+          0) {
+        indexes.add(i);
+      }
+    }
+    if (indexes.length > 0) {
+      //remove unexisting users
+      for (var i = indexes.length - 1; i >= 0; i--) {
+        _items.removeAt(indexes[i]);
+      }
+      changed = true;
+    }
+    //add new users from server
+    for (var i = 0; i < updatedList.length; i++) {
+      if (_items.indexWhere(
+              (element) => (element.compareTo(updatedList[i]) == 0)) <
+          0) {
+        _items.add(updatedList[i]);
+        changed = true;
+      }
+    }
+    if (changed) {
+      notifyListeners();
+    }
   }
 
   void removeAll() {
     _items.clear();
-    // This call tells the widgets that are listening to this model to rebuild.
     notifyListeners();
   }
 }

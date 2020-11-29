@@ -38,11 +38,7 @@ class _FriendsListState extends State<FriendsList> {
               itemCount: arr.length,
               padding: EdgeInsets.all(16.0),
               itemBuilder: (context, i) {
-                if (i >= arr.length) {
-                  return Text("nothing");
-                } else {
-                  return _buildRow(arr[i]);
-                }
+                return _buildRow(arr[i]);
               });
         }
 

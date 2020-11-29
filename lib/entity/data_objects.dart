@@ -3,17 +3,17 @@ import 'package:json_annotation/json_annotation.dart';
 part 'data_objects.g.dart';
 
 @JsonSerializable()
-class User {
+class User implements Comparable<User> {
   User(this.id, this.ip, this.port);
 
-  @JsonKey(required: true)
-  String id;
+  @JsonKey(required: true, disallowNullValue: true)
+  String id = "";
 
-  @JsonKey(defaultValue: "127.0.0.1")
-  String ip;
+  @JsonKey(required: true, disallowNullValue: true)
+  String ip = "";
 
-  @JsonKey(defaultValue: 27950)
-  int port;
+  @JsonKey(required: true, disallowNullValue: true)
+  int port = 0;
 
   @JsonKey(defaultValue: "")
   String publicName = "";
@@ -31,4 +31,29 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  @override
+  int compareTo(User other) {
+    if (other.id == this.id) {
+      return 0;
+    }
+    var result = this.port - other.port;
+    if (result == 0) {
+      result = 1;
+    }
+    return result;
+  }
+}
+
+@JsonSerializable()
+class IdsRequest {
+  IdsRequest(this.ids);
+
+  @JsonKey(required: false, defaultValue: [])
+  List<String> ids = [];
+
+  factory IdsRequest.fromJson(Map<String, dynamic> json) =>
+      _$IdsRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$IdsRequestToJson(this);
 }
