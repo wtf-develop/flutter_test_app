@@ -50,7 +50,9 @@ class UserListModel extends ChangeNotifier {
   }
 
   void removeAll() {
-    _items.clear();
-    notifyListeners();
+    if(_items.isNotEmpty) {
+      _items.clear();
+      notifyListeners();
+    }
   }
 }
