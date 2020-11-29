@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:udp_hole/entity/data_objects.dart';
+import 'package:udp_hole/common/entity/data_objects.dart';
 import 'package:udp_hole/view_friends/model.dart';
 
 void main() {
@@ -15,11 +15,15 @@ void main() {
     mylist.add(User("kalsjfh3", "ip", 99));
     mylist.add(User("kalsjfh4", "ip", 99));
     mylist.add(User("kalsjfh5", "ip", 99));
+    mylist.add(User("kalsjfh6", "ip", 99));
+    mylist.add(User("kalsjfh7", "ip", 99));
+    mylist.add(User("kalsjfh8", "ip", 99));
+    mylist.add(User("kalsjfh9", "ip", 99));
     expect(mylist.items[3].id, "kalsjfh4");
-    expect(mylist.items.length, 5);
+    expect(mylist.items.length, 9);
 
 
-    //remove element - "kalsjfh4"
+    //remove element - "kalsjfh4",6,7,8,9
     List<User> fromServer = [
       User("kalsjfh5", "ip", 99),
       User("kalsjfh1", "ip", 99),

@@ -1,19 +1,38 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:udp_hole/entity/data_objects.dart';
+import 'package:flutter/material.dart';
+import 'package:udp_hole/common/entity/data_objects.dart';
+
+import 'repository.dart';
 
 class UserListModel extends ChangeNotifier {
-  final List<User> _items = [
-    User("Hello name", "Ip address", 3333),
-    User("Good bye", "192.168.0.xxx", 8888)
-  ];
+  final List<User> _items = List<User>();
+  var _requestInProgress = false;
+  final UserListRepo _repo = UserListRepo();
+
+  void updateFromServer() {
+    _requestInProgress = true;
+    _repo.getOnlineUsers().then((value) {
+      _requestInProgress = false;
+      update(value);
+    });
+  }
 
   UnmodifiableListView<User> get items => UnmodifiableListView(_items);
+
+  bool get requestInProgress => _requestInProgress;
 
   void add(User item) {
     _items.add(item);
     notifyListeners();
+  }
+
+  void removeAll() {
+    if (_items.isNotEmpty) {
+      _items.clear();
+      notifyListeners();
+    }
   }
 
   void update(List<User> updatedList) {
@@ -45,13 +64,6 @@ class UserListModel extends ChangeNotifier {
       }
     }
     if (changed) {
-      notifyListeners();
-    }
-  }
-
-  void removeAll() {
-    if(_items.isNotEmpty) {
-      _items.clear();
       notifyListeners();
     }
   }

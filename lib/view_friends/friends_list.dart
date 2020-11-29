@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:udp_hole/entity/data_objects.dart';
+import 'package:udp_hole/common/entity/data_objects.dart';
 
 import 'model.dart';
 
@@ -11,12 +11,19 @@ class FriendsList extends StatefulWidget {
 
 class _FriendsListState extends State<FriendsList> {
   @override
+  void initState() {
+    super.initState();
+    Provider.of<UserListModel>(context, listen: false).updateFromServer();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('UDP-hole-punching-chat'),
       ),
       body: Consumer<UserListModel>(builder: (context, user, child) {
+        //generate each row in list
         Widget _buildRow(User user) {
           return ListTile(
             title: Text(
@@ -32,6 +39,7 @@ class _FriendsListState extends State<FriendsList> {
           );
         }
 
+        //create dynamic list for big item count
         Widget _buildUserList() {
           var arr = user.items;
           return ListView.builder(
@@ -42,7 +50,11 @@ class _FriendsListState extends State<FriendsList> {
               });
         }
 
-        return _buildUserList();
+        if (user.items.isEmpty && user.requestInProgress) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          return _buildUserList();
+        }
       }),
     );
   }
