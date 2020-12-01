@@ -9,4 +9,10 @@ class NetworkClient {
               3333 + i));
     });
   }
+
+  Future<List<String>> getMessages() {
+    return Future.delayed(Duration(milliseconds: 1000)).then((value) {
+      return List<String>.generate(10, (i) => ("Message" + i.toString()));
+    });
+  }
 }
