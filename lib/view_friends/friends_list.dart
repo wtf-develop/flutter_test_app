@@ -21,6 +21,8 @@ class _FriendsListState extends State<FriendsList> {
     return Scaffold(
       appBar: AppBar(
         title: Text('UDP-hole-punching-chat'),
+        elevation:
+        Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
       ),
       body: Consumer<UserListModel>(builder: (context, user, child) {
         //generate each row in list

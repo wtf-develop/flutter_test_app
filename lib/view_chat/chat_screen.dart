@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'message_row.dart';
@@ -7,20 +8,28 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final List<MessageRow> _messages = [];
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  bool _isComposing = false;
 
   void _handleSubmitted(String text) {
     _textController.clear();
     MessageRow message = MessageRow(
       text: text,
+      animationController: AnimationController(
+        duration: const Duration(milliseconds: 200),
+        vsync: this,
+      ),
     );
+
     setState(() {
+      _isComposing = false;
       _messages.insert(0, message);
     });
     _focusNode.requestFocus();
+    message.animationController.forward();
   }
 
   Widget _buildTextComposer() {
@@ -32,20 +41,40 @@ class _ChatScreenState extends State<ChatScreen> {
           Flexible(
             child: TextField(
               controller: _textController,
-              onSubmitted: _handleSubmitted,
+              onChanged: (String text) {
+                setState(() {
+                  _isComposing = text.length > 0;
+                });
+              },
+              onSubmitted: _isComposing ? _handleSubmitted : null,
               decoration: InputDecoration.collapsed(hintText: 'Send a message'),
               focusNode: _focusNode,
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 4.0),
-            child: IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () => _handleSubmitted(_textController.text)),
-          )
+              margin: EdgeInsets.symmetric(horizontal: 4.0),
+              child: Theme.of(context).platform == TargetPlatform.iOS
+                  ? CupertinoButton(
+                      child: Text('Send'),
+                      onPressed: _isComposing
+                          ? () => _handleSubmitted(_textController.text)
+                          : null,
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: _isComposing
+                          ? () => _handleSubmitted(_textController.text)
+                          : null,
+                    ))
         ]),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (MessageRow message in _messages) message.animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -53,6 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Online Chat'),
+        elevation: Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
       ),
       body: Column(
         children: [
