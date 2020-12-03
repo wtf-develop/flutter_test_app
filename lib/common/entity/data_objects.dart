@@ -2,6 +2,10 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'data_objects.g.dart';
 
+//flutter pub run build_runner build
+// or once
+//flutter pub run build_runner watch
+
 @JsonSerializable()
 class User implements Comparable<User> {
   User(this.id, this.ip, this.port);
@@ -47,13 +51,32 @@ class User implements Comparable<User> {
 
 @JsonSerializable()
 class IdsRequest {
-  IdsRequest(this.ids);
+  IdsRequest(this.sender, this.ids);
 
   @JsonKey(required: false, defaultValue: [])
   List<String> ids = [];
+
+  @JsonKey(required: true, defaultValue: "")
+  String sender = "";
 
   factory IdsRequest.fromJson(Map<String, dynamic> json) =>
       _$IdsRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$IdsRequestToJson(this);
+}
+
+@JsonSerializable()
+class UsersList {
+  UsersList(this.sender, this.users);
+
+  @JsonKey(required: true, defaultValue: "")
+  String sender = "";
+
+  @JsonKey(required: false, defaultValue: [])
+  List<User> users = [];
+
+  factory UsersList.fromJson(Map<String, dynamic> json) =>
+      _$UsersListFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UsersListToJson(this);
 }

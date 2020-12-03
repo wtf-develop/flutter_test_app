@@ -39,4 +39,3 @@ class MessageRow extends StatelessWidget {
     );
   }
 }
-

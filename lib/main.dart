@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'common/network/client.dart';
 import 'view_chat/chat_screen.dart';
 import 'view_chat/model.dart';
 import 'view_friends/friends_list.dart';
 import 'view_friends/model.dart';
 
 void main() {
+  NetworkClient().startServer();
   runApp(
     FriendlyChatApp(),
   );

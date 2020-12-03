@@ -34,7 +34,9 @@ Map<String, dynamic> _$UserToJson(User instance) {
 }
 
 IdsRequest _$IdsRequestFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, requiredKeys: const ['sender']);
   return IdsRequest(
+    json['sender'] as String ?? '',
     (json['ids'] as List)?.map((e) => e as String)?.toList() ?? [],
   );
 }
@@ -42,4 +44,22 @@ IdsRequest _$IdsRequestFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$IdsRequestToJson(IdsRequest instance) =>
     <String, dynamic>{
       'ids': instance.ids,
+      'sender': instance.sender,
+    };
+
+UsersList _$UsersListFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, requiredKeys: const ['sender']);
+  return UsersList(
+    json['sender'] as String ?? '',
+    (json['users'] as List)
+            ?.map((e) =>
+                e == null ? null : User.fromJson(e as Map<String, dynamic>))
+            ?.toList() ??
+        [],
+  );
+}
+
+Map<String, dynamic> _$UsersListToJson(UsersList instance) => <String, dynamic>{
+      'sender': instance.sender,
+      'users': instance.users,
     };
