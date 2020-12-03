@@ -69,12 +69,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       }
     }
     MessageRow message = MessageRow(
+      name: data.from,
+      text: data.message,
       animationController: AnimationController(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 400),
         vsync: this,
       ),
     );
-    message.setText(data.from, data.message);
     message.animationController.forward();
     _view_messages.insert(0, message);
     return message;
