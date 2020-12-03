@@ -61,20 +61,22 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   List<MessageRow> _view_messages = [];
 
-  Widget _buildMessage(DataMessage data, index) {
-    /*if ((index < _view_messages.length) && (_view_messages[index] != null)) {
-      _view_messages[index].text=data.message;
-      return _view_messages[index];
-    }*/
+  Widget _buildMessage(int totalCount, DataMessage data, index) {
+    if (totalCount <= _view_messages.length) {
+      if ((_view_messages[index] != null)) {
+        /////_view_messages[index].setText(data.from, data.message);
+        return _view_messages[index];
+      }
+    }
     MessageRow message = MessageRow(
-      text: data.message,
       animationController: AnimationController(
-        duration: const Duration(milliseconds: 2000),
+        duration: const Duration(milliseconds: 200),
         vsync: this,
       ),
     );
+    message.setText(data.from, data.message);
     message.animationController.forward();
-    //_view_messages.insert(index, message);
+    _view_messages.insert(0, message);
     return message;
   }
 
@@ -85,7 +87,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    for (MessageRow message in _view_messages) {
+    for (int index = 0; index < _view_messages.length; index++) {
+      MessageRow message = _view_messages[index];
       message.animationController.dispose();
     }
     super.dispose();
@@ -106,8 +109,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 child: ListView.builder(
                   padding: EdgeInsets.all(8.0),
                   reverse: true,
-                  itemBuilder: (_, int index) =>
-                      _buildMessage(chat.getOneMessage(index), index),
+                  itemBuilder: (_, int index) => _buildMessage(
+                      chat.chatSize(), chat.getOneMessage(index), index),
                   itemCount: chat.chatSize(),
                 ),
               ),
