@@ -13,9 +13,9 @@ class UserListModel extends ChangeNotifier {
 
   void updateFromServer() {
     _requestInProgress = true;
-    _repo.getOnlineUsers().then((value) {
+    _repo.getOnlineUsers().listen((list) {
       _requestInProgress = false;
-      update(value);
+      update(list);
     });
   }
 

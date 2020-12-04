@@ -4,7 +4,8 @@ import 'package:udp_hole/common/network/client.dart';
 class UserListRepo {
   var network = NetworkClient();
 
-  Future<List<User>> getOnlineUsers() {
-    return network.getUsers();
+  Stream<List<User>> getOnlineUsers() {
+    var stream = network.getUsersListStream();
+    return stream;
   }
 }

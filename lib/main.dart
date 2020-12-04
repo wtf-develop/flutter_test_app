@@ -8,10 +8,10 @@ import 'view_friends/friends_list.dart';
 import 'view_friends/model.dart';
 
 void main() {
-  NetworkClient().startServer();
   runApp(
     FriendlyChatApp(),
   );
+  NetworkClient().startServer();
 }
 
 class FriendlyChatApp extends StatelessWidget {
