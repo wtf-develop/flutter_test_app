@@ -63,3 +63,33 @@ Map<String, dynamic> _$UsersListToJson(UsersList instance) => <String, dynamic>{
       'sender': instance.sender,
       'users': instance.users,
     };
+
+MyContact _$MyContactFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, requiredKeys: const ['id']);
+  return MyContact(
+    json['id'] as String ?? '',
+    json['ipv4'] as String ?? '',
+  );
+}
+
+Map<String, dynamic> _$MyContactToJson(MyContact instance) => <String, dynamic>{
+      'id': instance.id,
+      'ipv4': instance.ipv4,
+    };
+
+MyContactsList _$MyContactsListFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, requiredKeys: const ['contacts']);
+  return MyContactsList(
+    (json['contacts'] as List)
+            ?.map((e) => e == null
+                ? null
+                : MyContact.fromJson(e as Map<String, dynamic>))
+            ?.toList() ??
+        [],
+  );
+}
+
+Map<String, dynamic> _$MyContactsListToJson(MyContactsList instance) =>
+    <String, dynamic>{
+      'contacts': instance.contacts,
+    };

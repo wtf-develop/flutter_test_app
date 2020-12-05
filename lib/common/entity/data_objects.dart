@@ -80,3 +80,33 @@ class UsersList {
 
   Map<String, dynamic> toJson() => _$UsersListToJson(this);
 }
+
+
+@JsonSerializable()
+class MyContact {
+  MyContact(this.id, this.ipv4);
+
+  @JsonKey(required: true, defaultValue: "")
+  String id = "";
+
+  @JsonKey(required: false, defaultValue: "")
+  String ipv4 = "";
+
+  factory MyContact.fromJson(Map<String, dynamic> json) =>
+      _$MyContactFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MyContactToJson(this);
+}
+
+@JsonSerializable()
+class MyContactsList {
+  MyContactsList(this.contacts);
+
+  @JsonKey(required: true, defaultValue: [])
+  List<MyContact> contacts = [];
+
+  factory MyContactsList.fromJson(Map<String, dynamic> json) =>
+      _$MyContactsListFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MyContactsListToJson(this);
+}
