@@ -8,13 +8,13 @@ part of 'data_objects.dart';
 
 User _$UserFromJson(Map<String, dynamic> json) {
   $checkKeys(json,
-      requiredKeys: const ['u', 'i', 'p'],
-      disallowNullValues: const ['u', 'i', 'p']);
+      requiredKeys: const ['u'], disallowNullValues: const ['u', 'i', 'p']);
   return User(
+    json['n'] as String ?? '',
     json['u'] as String,
     json['i'] as String,
     json['p'] as int,
-  )..publicName = json['n'] as String ?? '';
+  );
 }
 
 Map<String, dynamic> _$UserToJson(User instance) {
@@ -72,7 +72,7 @@ MyContact _$MyContactFromJson(Map<String, dynamic> json) {
     json['l'] as String ?? '',
     json['o'] as int ?? 0,
     json['c'] as int ?? 0,
-  );
+  )..tags = (json['t'] as List)?.map((e) => e as String)?.toList() ?? [];
 }
 
 Map<String, dynamic> _$MyContactToJson(MyContact instance) => <String, dynamic>{
@@ -81,12 +81,12 @@ Map<String, dynamic> _$MyContactToJson(MyContact instance) => <String, dynamic>{
       'l': instance.lastIp,
       'o': instance.lastOnline,
       'c': instance.created,
+      't': instance.tags,
     };
 
 MyContactsList _$MyContactsListFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, requiredKeys: const ['contacts']);
   return MyContactsList(
-    (json['contacts'] as List)
+    (json['a'] as List)
             ?.map((e) => e == null
                 ? null
                 : MyContact.fromJson(e as Map<String, dynamic>))
@@ -97,5 +97,5 @@ MyContactsList _$MyContactsListFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$MyContactsListToJson(MyContactsList instance) =>
     <String, dynamic>{
-      'contacts': instance.contacts,
+      'a': instance.contacts,
     };

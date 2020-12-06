@@ -8,15 +8,15 @@ part 'data_objects.g.dart';
 
 @JsonSerializable()
 class User implements Comparable<User> {
-  User(this.id, this.ipv4, this.port);
+  User(this.publicName,this.id, this.ipv4, this.port);
 
   @JsonKey(name: "u", required: true, disallowNullValue: true)
   String id = "";
 
-  @JsonKey(name: "i", required: true, disallowNullValue: true)
+  @JsonKey(name: "i", required: false, disallowNullValue: true)
   String ipv4 = "";
 
-  @JsonKey(name: "p", required: true, disallowNullValue: true)
+  @JsonKey(name: "p", required: false, disallowNullValue: true)
   int port = 0;
 
   @JsonKey(name: "n", defaultValue: "")
@@ -101,6 +101,9 @@ class MyContact {
   @JsonKey(name: "c", required: true, defaultValue: 0)
   int created = 0;
 
+  @JsonKey(name: "t", required: false, defaultValue: [])
+  List<String> tags = [];
+
   factory MyContact.fromJson(Map<String, dynamic> json) =>
       _$MyContactFromJson(json);
 
@@ -111,7 +114,7 @@ class MyContact {
 class MyContactsList {
   MyContactsList(this.contacts);
 
-  @JsonKey(required: true, defaultValue: [])
+  @JsonKey(name: "a", required: false, defaultValue: [])
   List<MyContact> contacts = [];
 
   @JsonKey(ignore: true)

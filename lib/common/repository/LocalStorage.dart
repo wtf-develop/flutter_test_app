@@ -18,11 +18,14 @@ class LocalStorage {
 
   SharedPreferences _sharedPrefs;
 
+  _generateUUID() => (DateTime.now().year - 2020).toString() + randomString(15);
+
   init() async {
     if (_sharedPrefs == null) {
       _sharedPrefs = await SharedPreferences.getInstance();
     }
     _my_uniq_id = _sharedPrefs.getString("uniq_id");
+    _nick_name = _sharedPrefs.getString("nick_name") ?? "default";
     if (_my_uniq_id == null) {
       final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
       try {
@@ -34,14 +37,26 @@ class LocalStorage {
           _my_uniq_id = data.identifierForVendor; //UUID for iOS
         }
       } on Exception {
-        _my_uniq_id = randomString(15);
+        _my_uniq_id = _generateUUID();
       }
       if (_my_uniq_id == null || _my_uniq_id.length < 12) {
-        _my_uniq_id = randomString(15);
+        _my_uniq_id = _generateUUID();
       }
       _my_uniq_id = _my_uniq_id.toLowerCase();
       _sharedPrefs.setString("uniq_id", _my_uniq_id);
     }
+  }
+
+  String _nick_name = "";
+
+  String getNickname() {
+    return _nick_name;
+  }
+
+  String setNickName(String s) {
+    _nick_name = s;
+    _sharedPrefs.setString("nick_name", _nick_name);
+    return getNickname();
   }
 
   String _my_uniq_id;
@@ -95,6 +110,6 @@ class LocalStorage {
   void storeContacts(MyContactsList data) async {
     _dataContacts = data;
     jsonEncode(data.toJson());
-    await _sharedPrefs.setString("MyContacts", jsonEncode(data.toJson()));
+    _sharedPrefs.setString("MyContacts", jsonEncode(data.toJson()));
   }
 }

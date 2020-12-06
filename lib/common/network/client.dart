@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
-import 'dart:math';
 
 import 'package:udp/udp.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
@@ -23,7 +22,13 @@ class NetworkClient {
   Future<void> fetchOnlineUsers() async {
     if (_localStorage.getMyUniqId().length < 10) return Future.value();
     IdsRequest ids = IdsRequest(
-        _localStorage.getMyUniqId(), ["jtwhe1", "jtwhe2", "jtwhe3", "jtwhe4"]);
+        _localStorage.getMyUniqId(), _localStorage.getContacts().getIdsOnly());
+    /*await _local_server.send(
+        ("L" + jsonEncode(ids.toJson())).codeUnits,
+        Endpoint.unicast(InternetAddress("wtf-dew.ru"),
+            port: Port(_SERVER_PORT)));*/
+
+    ids = IdsRequest(_localStorage.getMyUniqId(), []);
     await _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.broadcast(port: Port(_SERVER_PORT)));
     return Future.value();
@@ -38,7 +43,6 @@ class NetworkClient {
   UDP _local_server;
   var _serverOnline = false;
   Timer _timer;
-  var _rnd = new Random();
 
   void startServer() async {
     _local_server = await UDP.bind(Endpoint.any(port: Port(_SERVER_PORT)));
@@ -83,14 +87,10 @@ class NetworkClient {
             dev.log("Server get: " + str);
           }
 
-          var start = _rnd.nextInt(15);
-          var users = List<User>.generate(30, (i) {
-            var index = i + start;
-            return User(
-                index.toString() + "HelloIdname",
-                "Address in Internet".substring(index % 20) + index.toString(),
-                3333 + index);
-          });
+          var users = [
+            User(
+                _localStorage.getNickname(), _localStorage.getMyUniqId(), "", 0)
+          ];
           //send list with users
           _local_server.send(
               ("U" +
