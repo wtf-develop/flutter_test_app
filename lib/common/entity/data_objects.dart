@@ -8,18 +8,18 @@ part 'data_objects.g.dart';
 
 @JsonSerializable()
 class User implements Comparable<User> {
-  User(this.id, this.ip, this.port);
+  User(this.id, this.ipv4, this.port);
 
-  @JsonKey(required: true, disallowNullValue: true)
+  @JsonKey(name: "u", required: true, disallowNullValue: true)
   String id = "";
 
-  @JsonKey(required: true, disallowNullValue: true)
-  String ip = "";
+  @JsonKey(name: "i", required: true, disallowNullValue: true)
+  String ipv4 = "";
 
-  @JsonKey(required: true, disallowNullValue: true)
+  @JsonKey(name: "p", required: true, disallowNullValue: true)
   int port = 0;
 
-  @JsonKey(defaultValue: "")
+  @JsonKey(name: "n", defaultValue: "")
   String publicName = "";
 
   @JsonKey(ignore: true)
@@ -27,7 +27,7 @@ class User implements Comparable<User> {
 
   @JsonKey(ignore: true, required: false)
   String get visibleName => (_privateName.isEmpty
-      ? (publicName.isEmpty ? (ip) : (publicName))
+      ? (publicName.isEmpty ? (ipv4) : (publicName))
       : _privateName);
 
   set visibleName(String name) => _privateName = name;
@@ -53,10 +53,10 @@ class User implements Comparable<User> {
 class IdsRequest {
   IdsRequest(this.sender, this.ids);
 
-  @JsonKey(required: false, defaultValue: [])
+  @JsonKey(name: "d", required: false, defaultValue: [])
   List<String> ids = [];
 
-  @JsonKey(required: true, defaultValue: "")
+  @JsonKey(name: "s", required: true, defaultValue: "")
   String sender = "";
 
   factory IdsRequest.fromJson(Map<String, dynamic> json) =>
@@ -69,10 +69,10 @@ class IdsRequest {
 class UsersList {
   UsersList(this.sender, this.users);
 
-  @JsonKey(required: true, defaultValue: "")
+  @JsonKey(name: "s", required: true, defaultValue: "")
   String sender = "";
 
-  @JsonKey(required: false, defaultValue: [])
+  @JsonKey(name: "r", required: false, defaultValue: [])
   List<User> users = [];
 
   factory UsersList.fromJson(Map<String, dynamic> json) =>
@@ -81,16 +81,25 @@ class UsersList {
   Map<String, dynamic> toJson() => _$UsersListToJson(this);
 }
 
-
 @JsonSerializable()
 class MyContact {
-  MyContact(this.id, this.ipv4);
+  MyContact(
+      this.id, this.privateName, this.lastIp, this.lastOnline, this.created);
 
-  @JsonKey(required: true, defaultValue: "")
+  @JsonKey(name: "u", required: true, defaultValue: "")
   String id = "";
 
-  @JsonKey(required: false, defaultValue: "")
-  String ipv4 = "";
+  @JsonKey(name: "n", required: true, defaultValue: "")
+  String privateName = "";
+
+  @JsonKey(name: "l", required: true, defaultValue: "")
+  String lastIp = "";
+
+  @JsonKey(name: "o", required: true, defaultValue: 0)
+  int lastOnline = 0;
+
+  @JsonKey(name: "c", required: true, defaultValue: 0)
+  int created = 0;
 
   factory MyContact.fromJson(Map<String, dynamic> json) =>
       _$MyContactFromJson(json);
@@ -104,6 +113,15 @@ class MyContactsList {
 
   @JsonKey(required: true, defaultValue: [])
   List<MyContact> contacts = [];
+
+  @JsonKey(ignore: true)
+  List<String> getIdsOnly() {
+    var arr = List<String>();
+    for (var item in contacts) {
+      arr.add(item.id);
+    }
+    return arr;
+  }
 
   factory MyContactsList.fromJson(Map<String, dynamic> json) =>
       _$MyContactsListFromJson(json);

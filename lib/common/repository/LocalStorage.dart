@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:device_info/device_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
+
+import '../utils.dart';
 
 class LocalStorage {
   LocalStorage._privateConstructor();
@@ -18,6 +22,32 @@ class LocalStorage {
     if (_sharedPrefs == null) {
       _sharedPrefs = await SharedPreferences.getInstance();
     }
+    _my_uniq_id = _sharedPrefs.getString("uniq_id");
+    if (_my_uniq_id == null) {
+      final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+      try {
+        if (Platform.isAndroid) {
+          var build = await deviceInfoPlugin.androidInfo;
+          _my_uniq_id = build.androidId; //UUID for Android
+        } else if (Platform.isIOS) {
+          var data = await deviceInfoPlugin.iosInfo;
+          _my_uniq_id = data.identifierForVendor; //UUID for iOS
+        }
+      } on Exception {
+        _my_uniq_id = randomString(15);
+      }
+      if (_my_uniq_id == null || _my_uniq_id.length < 12) {
+        _my_uniq_id = randomString(15);
+      }
+      _my_uniq_id = _my_uniq_id.toLowerCase();
+      _sharedPrefs.setString("uniq_id", _my_uniq_id);
+    }
+  }
+
+  String _my_uniq_id;
+
+  String getMyUniqId() {
+    return _my_uniq_id ?? "";
   }
 
   MyContactsList _dataContacts;

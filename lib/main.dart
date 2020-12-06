@@ -9,6 +9,7 @@ import 'view_friends/friends_list.dart';
 import 'view_friends/model.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   LocalStorage().init();
   NetworkClient().startServer();
   runApp(

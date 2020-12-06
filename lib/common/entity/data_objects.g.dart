@@ -8,13 +8,13 @@ part of 'data_objects.dart';
 
 User _$UserFromJson(Map<String, dynamic> json) {
   $checkKeys(json,
-      requiredKeys: const ['id', 'ip', 'port'],
-      disallowNullValues: const ['id', 'ip', 'port']);
+      requiredKeys: const ['u', 'i', 'p'],
+      disallowNullValues: const ['u', 'i', 'p']);
   return User(
-    json['id'] as String,
-    json['ip'] as String,
-    json['port'] as int,
-  )..publicName = json['publicName'] as String ?? '';
+    json['u'] as String,
+    json['i'] as String,
+    json['p'] as int,
+  )..publicName = json['n'] as String ?? '';
 }
 
 Map<String, dynamic> _$UserToJson(User instance) {
@@ -26,32 +26,32 @@ Map<String, dynamic> _$UserToJson(User instance) {
     }
   }
 
-  writeNotNull('id', instance.id);
-  writeNotNull('ip', instance.ip);
-  writeNotNull('port', instance.port);
-  val['publicName'] = instance.publicName;
+  writeNotNull('u', instance.id);
+  writeNotNull('i', instance.ipv4);
+  writeNotNull('p', instance.port);
+  val['n'] = instance.publicName;
   return val;
 }
 
 IdsRequest _$IdsRequestFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, requiredKeys: const ['sender']);
+  $checkKeys(json, requiredKeys: const ['s']);
   return IdsRequest(
-    json['sender'] as String ?? '',
-    (json['ids'] as List)?.map((e) => e as String)?.toList() ?? [],
+    json['s'] as String ?? '',
+    (json['d'] as List)?.map((e) => e as String)?.toList() ?? [],
   );
 }
 
 Map<String, dynamic> _$IdsRequestToJson(IdsRequest instance) =>
     <String, dynamic>{
-      'ids': instance.ids,
-      'sender': instance.sender,
+      'd': instance.ids,
+      's': instance.sender,
     };
 
 UsersList _$UsersListFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, requiredKeys: const ['sender']);
+  $checkKeys(json, requiredKeys: const ['s']);
   return UsersList(
-    json['sender'] as String ?? '',
-    (json['users'] as List)
+    json['s'] as String ?? '',
+    (json['r'] as List)
             ?.map((e) =>
                 e == null ? null : User.fromJson(e as Map<String, dynamic>))
             ?.toList() ??
@@ -60,21 +60,27 @@ UsersList _$UsersListFromJson(Map<String, dynamic> json) {
 }
 
 Map<String, dynamic> _$UsersListToJson(UsersList instance) => <String, dynamic>{
-      'sender': instance.sender,
-      'users': instance.users,
+      's': instance.sender,
+      'r': instance.users,
     };
 
 MyContact _$MyContactFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, requiredKeys: const ['id']);
+  $checkKeys(json, requiredKeys: const ['u', 'n', 'l', 'o', 'c']);
   return MyContact(
-    json['id'] as String ?? '',
-    json['ipv4'] as String ?? '',
+    json['u'] as String ?? '',
+    json['n'] as String ?? '',
+    json['l'] as String ?? '',
+    json['o'] as int ?? 0,
+    json['c'] as int ?? 0,
   );
 }
 
 Map<String, dynamic> _$MyContactToJson(MyContact instance) => <String, dynamic>{
-      'id': instance.id,
-      'ipv4': instance.ipv4,
+      'u': instance.id,
+      'n': instance.privateName,
+      'l': instance.lastIp,
+      'o': instance.lastOnline,
+      'c': instance.created,
     };
 
 MyContactsList _$MyContactsListFromJson(Map<String, dynamic> json) {

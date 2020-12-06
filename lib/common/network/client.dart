@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:udp/udp.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
+import 'package:udp_hole/common/repository/LocalStorage.dart';
 
 class NetworkClient {
   NetworkClient._privateConstructor();
@@ -15,13 +16,14 @@ class NetworkClient {
     return _instance;
   }
 
-  static const _clientId = "itwasme7";
+  static final LocalStorage _localStorage = LocalStorage();
 
   static const _SERVER_PORT = 65002;
 
   Future<void> fetchOnlineUsers() async {
-    IdsRequest ids =
-        IdsRequest(_clientId, ["jtwhe1", "jtwhe2", "jtwhe3", "jtwhe4"]);
+    if (_localStorage.getMyUniqId().length < 10) return Future.value();
+    IdsRequest ids = IdsRequest(
+        _localStorage.getMyUniqId(), ["jtwhe1", "jtwhe2", "jtwhe3", "jtwhe4"]);
     await _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.broadcast(port: Port(_SERVER_PORT)));
     return Future.value();
@@ -66,6 +68,7 @@ class NetworkClient {
         sync: false);
     while (_serverOnline) {
       await _local_server.listen((datagram) {
+        if (_localStorage.getMyUniqId().length < 10) return;
         var str = String.fromCharCodes(datagram.data);
 
         Map response = jsonDecode(str.substring(1));
@@ -73,7 +76,7 @@ class NetworkClient {
         if (str.startsWith("L{")) {
           /// request from other clients to local app in local network
           var ids = IdsRequest.fromJson(response);
-          if (ids.sender == _clientId) {
+          if (ids.sender == _localStorage.getMyUniqId()) {
             //get packet from myself ignore it
             dev.log("Server get myself: " + datagram.address.toString() + str);
           } else {
@@ -90,13 +93,15 @@ class NetworkClient {
           });
           //send list with users
           _local_server.send(
-              ("U" + jsonEncode((UsersList(_clientId, users)).toJson()))
+              ("U" +
+                      jsonEncode((UsersList(_localStorage.getMyUniqId(), users))
+                          .toJson()))
                   .codeUnits,
               Endpoint.unicast(datagram.address, port: Port(datagram.port)));
         } else if (str.startsWith("U{")) {
           ///we receive response from server with list of online users
           var users = UsersList.fromJson(response);
-          if (users.sender == _clientId) {
+          if (users.sender == _localStorage.getMyUniqId()) {
             dev.log(
                 "Client receive myself: " + datagram.address.toString() + str);
           } else {
