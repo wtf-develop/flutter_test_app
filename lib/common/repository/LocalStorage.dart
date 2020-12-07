@@ -20,7 +20,7 @@ class LocalStorage {
 
   _generateUUID() => (DateTime.now().year - 2020).toString() + randomString(15);
 
-  init() async {
+  Future<void> init() async {
     if (_sharedPrefs == null) {
       _sharedPrefs = await SharedPreferences.getInstance();
     }
@@ -45,6 +45,7 @@ class LocalStorage {
       _my_uniq_id = _my_uniq_id.toLowerCase();
       _sharedPrefs.setString("uniq_id", _my_uniq_id);
     }
+    return Future.value();
   }
 
   String _nick_name = "";

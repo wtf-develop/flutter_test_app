@@ -44,32 +44,37 @@ class NetworkClient {
   var _serverOnline = false;
   Timer _timer;
 
-  void startServer() async {
+  Future<void> startServer() async {
     _local_server = await UDP.bind(Endpoint.any(port: Port(_SERVER_PORT)));
 
     //periodic request to server
     _timer =
         Timer.periodic(Duration(seconds: 10), (Timer t) => fetchOnlineUsers());
+    if (_streamOnline == null) {
+      _streamOnline = _generateStream();
+    }
     _serverOnline = true;
     fetchOnlineUsers(); //inital request to server
     await _serverLoop(); //infinit loop
+    return Future.value();
   }
 
-  static List<User> _lastUsersList = [];
-  StreamController<List<User>> _streamOnline;
+  List<User> _lastUsersList = [];
+  StreamController<List<User>> _streamOnline = StreamController(sync: false);
+
+  StreamController _generateStream() => StreamController(
+      onListen: () {
+        if (_lastUsersList != null) {
+          _streamOnline.add(_lastUsersList);
+        }
+      },
+      sync: false);
 
   Stream<List<User>> getUsersListStream() {
     return _streamOnline.stream;
   }
 
   Future<void> _serverLoop() async {
-    _streamOnline = StreamController(
-        onListen: () {
-          if (_lastUsersList != null) {
-            _streamOnline.add(_lastUsersList);
-          }
-        },
-        sync: false);
     while (_serverOnline) {
       await _local_server.listen((datagram) {
         if (_localStorage.getMyUniqId().length < 10) return;
@@ -78,7 +83,7 @@ class NetworkClient {
         Map response = jsonDecode(str.substring(1));
 
         if (str.startsWith("L{")) {
-          /// request from other clients to local app in local network
+          // Request from other clients to local app in local network
           var ids = IdsRequest.fromJson(response);
           if (ids.sender == _localStorage.getMyUniqId()) {
             //get packet from myself ignore it
@@ -98,8 +103,17 @@ class NetworkClient {
                           .toJson()))
                   .codeUnits,
               Endpoint.unicast(datagram.address, port: Port(datagram.port)));
+        } else if (str.startsWith("P{")) {
+          // Ping
+          _local_server.send(
+              ("U" +
+                      jsonEncode((UsersList(_localStorage.getMyUniqId(), []))
+                          .toJson()))
+                  .codeUnits,
+              Endpoint.unicast(datagram.address,
+                  port: Port(datagram.port))); //Pong
         } else if (str.startsWith("U{")) {
-          ///we receive response from server with list of online users
+          // We receive response from server with list of online users
           var users = UsersList.fromJson(response);
           if (users.sender == _localStorage.getMyUniqId()) {
             dev.log(

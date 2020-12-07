@@ -10,11 +10,13 @@ import 'view_friends/model.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  LocalStorage().init();
-  NetworkClient().startServer();
+  LocalStorage().init().then((_) {
+    NetworkClient().startServer();
+  });
   runApp(
     FriendlyChatApp(),
   );
+
 }
 
 class FriendlyChatApp extends StatelessWidget {

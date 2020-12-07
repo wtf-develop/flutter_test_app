@@ -101,6 +101,9 @@ class MyContact {
   @JsonKey(name: "c", required: true, defaultValue: 0)
   int created = 0;
 
+  @JsonKey(name: "s", required: true, defaultValue: 0)
+  int status = 0;
+
   @JsonKey(name: "t", required: false, defaultValue: [])
   List<String> tags = [];
 
