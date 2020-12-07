@@ -20,32 +20,37 @@ class LocalStorage {
 
   _generateUUID() => (DateTime.now().year - 2020).toString() + randomString(15);
 
-  Future<void> init() async {
-    if (_sharedPrefs == null) {
-      _sharedPrefs = await SharedPreferences.getInstance();
-    }
-    _my_uniq_id = _sharedPrefs.getString("uniq_id");
-    _nick_name = _sharedPrefs.getString("nick_name") ?? "default";
-    if (_my_uniq_id == null) {
-      final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
-      try {
-        if (Platform.isAndroid) {
-          var build = await deviceInfoPlugin.androidInfo;
-          _my_uniq_id = build.androidId; //UUID for Android
-        } else if (Platform.isIOS) {
-          var data = await deviceInfoPlugin.iosInfo;
-          _my_uniq_id = data.identifierForVendor; //UUID for iOS
+  Future<bool> init() {
+    return SharedPreferences.getInstance().then((value) {
+      _sharedPrefs = value;
+      _my_uniq_id = _sharedPrefs.getString("uniq_id");
+      _nick_name = _sharedPrefs.getString("nick_name") ?? "";
+      List<Future<bool>> list = [];
+      if (_my_uniq_id == null) {
+        final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+        try {
+          if (Platform.isAndroid) {
+            list.add(deviceInfoPlugin.androidInfo.then((value) {
+              _my_uniq_id = value.androidId; //UUID for Android
+              return Future.value(true);
+            }));
+          } else if (Platform.isIOS) {
+            list.add(deviceInfoPlugin.iosInfo.then((value) {
+              _my_uniq_id = value.identifierForVendor; //UUID for iOS
+              return Future.value(true);
+            }));
+          }
+        } on Exception {
+          _my_uniq_id = _generateUUID();
         }
-      } on Exception {
-        _my_uniq_id = _generateUUID();
+        if (_my_uniq_id == null || _my_uniq_id.length < 12) {
+          _my_uniq_id = _generateUUID();
+        }
+        _my_uniq_id = _my_uniq_id.toLowerCase();
+        _sharedPrefs.setString("uniq_id", _my_uniq_id);
       }
-      if (_my_uniq_id == null || _my_uniq_id.length < 12) {
-        _my_uniq_id = _generateUUID();
-      }
-      _my_uniq_id = _my_uniq_id.toLowerCase();
-      _sharedPrefs.setString("uniq_id", _my_uniq_id);
-    }
-    return Future.value();
+      return Future.wait(list).then((value) => Future.value(true));
+    });
   }
 
   String _nick_name = "";
@@ -76,13 +81,25 @@ class LocalStorage {
     return _dataContacts;
   }
 
-  void addContact(MyContact item) {
-    _dataContacts.contacts.add(item);
-    storeContacts(_dataContacts);
+  void addContact(MyContact item, {needsave = true}) {
+    var index =
+        _dataContacts.contacts.indexWhere((element) => element.id == item.id);
+    if (index > -1) {
+      _dataContacts.contacts[index].lastOnline = item.lastOnline;
+      _dataContacts.contacts[index].lastIp = item.lastIp;
+    } else {
+      _dataContacts.contacts.add(item);
+    }
+    if (needsave) storeContacts(_dataContacts);
   }
 
   void addContactsArr(List<MyContact> items) {
-    _dataContacts.contacts.addAll(items);
+    if (items.isEmpty) {
+      return;
+    }
+    items.forEach((element) {
+      addContact(element, needsave: false);
+    });
     storeContacts(_dataContacts);
   }
 
@@ -96,6 +113,7 @@ class LocalStorage {
   }
 
   void removeContactsArr(List<String> ids) {
+    if (ids.isEmpty) return;
     var needSave = false;
     for (int i = 0; i < ids.length; i++) {
       var index =

@@ -9,13 +9,13 @@ import 'view_friends/friends_list.dart';
 import 'view_friends/model.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  LocalStorage().init().then((_) {
-    NetworkClient().startServer();
-  });
+  //WidgetsFlutterBinding.ensureInitialized();
   runApp(
     FriendlyChatApp(),
   );
+  LocalStorage().init().then((_) {
+    NetworkClient().startServer();
+  });
 
 }
 

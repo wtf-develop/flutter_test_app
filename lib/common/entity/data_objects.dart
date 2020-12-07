@@ -22,8 +22,11 @@ class User implements Comparable<User> {
   @JsonKey(name: "n", defaultValue: "")
   String publicName = "";
 
-  @JsonKey(ignore: true)
+  @JsonKey(ignore: true,required: false)
   String _privateName = "";
+
+  @JsonKey(ignore: true,required: false)
+  bool lan = false;
 
   @JsonKey(ignore: true, required: false)
   String get visibleName => (_privateName.isEmpty

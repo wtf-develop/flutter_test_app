@@ -65,14 +65,16 @@ Map<String, dynamic> _$UsersListToJson(UsersList instance) => <String, dynamic>{
     };
 
 MyContact _$MyContactFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, requiredKeys: const ['u', 'n', 'l', 'o', 'c']);
+  $checkKeys(json, requiredKeys: const ['u', 'n', 'l', 'o', 'c', 's']);
   return MyContact(
     json['u'] as String ?? '',
     json['n'] as String ?? '',
     json['l'] as String ?? '',
     json['o'] as int ?? 0,
     json['c'] as int ?? 0,
-  )..tags = (json['t'] as List)?.map((e) => e as String)?.toList() ?? [];
+  )
+    ..status = json['s'] as int ?? 0
+    ..tags = (json['t'] as List)?.map((e) => e as String)?.toList() ?? [];
 }
 
 Map<String, dynamic> _$MyContactToJson(MyContact instance) => <String, dynamic>{
@@ -81,6 +83,7 @@ Map<String, dynamic> _$MyContactToJson(MyContact instance) => <String, dynamic>{
       'l': instance.lastIp,
       'o': instance.lastOnline,
       'c': instance.created,
+      's': instance.status,
       't': instance.tags,
     };
 

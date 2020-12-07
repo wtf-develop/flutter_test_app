@@ -60,11 +60,26 @@ class NetworkClient {
   }
 
   List<User> _lastUsersList = [];
+
+  void _addToStreamArr(User user, bool major) {
+    var index = _lastUsersList.indexWhere((element) => element.id == user.id);
+    if (index < 0) {
+      _lastUsersList.add(user);
+    } else {
+      if (major) {
+        _lastUsersList[index].ipv4 = user.ipv4;
+        _lastUsersList[index].port = user.port;
+      }
+
+      _lastUsersList[index].publicName = user.publicName;
+    }
+  }
+
   StreamController<List<User>> _streamOnline = StreamController(sync: false);
 
   StreamController _generateStream() => StreamController(
       onListen: () {
-        if (_lastUsersList != null) {
+        if (_lastUsersList.isNotEmpty) {
           _streamOnline.add(_lastUsersList);
         }
       },
@@ -92,26 +107,15 @@ class NetworkClient {
             dev.log("Server get: " + str);
           }
 
-          var users = [
-            User(
-                _localStorage.getNickname(), _localStorage.getMyUniqId(), "", 0)
-          ];
-          //send list with users
+          //send list with my device id
           _local_server.send(
               ("U" +
-                      jsonEncode((UsersList(_localStorage.getMyUniqId(), users))
-                          .toJson()))
+                      jsonEncode((UsersList(_localStorage.getMyUniqId(), [
+                        User(_localStorage.getNickname(),
+                            _localStorage.getMyUniqId(), "", 0)
+                      ])).toJson()))
                   .codeUnits,
               Endpoint.unicast(datagram.address, port: Port(datagram.port)));
-        } else if (str.startsWith("P{")) {
-          // Ping
-          _local_server.send(
-              ("U" +
-                      jsonEncode((UsersList(_localStorage.getMyUniqId(), []))
-                          .toJson()))
-                  .codeUnits,
-              Endpoint.unicast(datagram.address,
-                  port: Port(datagram.port))); //Pong
         } else if (str.startsWith("U{")) {
           // We receive response from server with list of online users
           var users = UsersList.fromJson(response);
@@ -121,8 +125,28 @@ class NetworkClient {
           } else {
             dev.log("Client receive: " + str);
           }
-          _lastUsersList = users.users;
-          _streamOnline?.add(users.users);
+
+          users.users.forEach((user) {
+            user.lan=false;
+            if (user.port == 0 && user.ipv4.length == 0) {
+              user.ipv4 = datagram.address.address;
+              user.port = datagram.port;
+              user.lan=true;
+              _addToStreamArr(user, true);
+            }else{
+              user.lan=false;
+              _addToStreamArr(user, false);
+            }
+          });
+          /*List<User> localUsers = users.users.where((user) {
+            return user.lan;
+          });
+
+          _localStorage.addContactsArr(localUsers.map((localUser) {
+            return MyContact(localUser.id, "", localUser.ipv4,
+                DateTime.now().millisecondsSinceEpoch, 0);
+          }));*/
+          _streamOnline?.add(_lastUsersList);
         }
       }, timeout: Duration(seconds: 200));
     }
