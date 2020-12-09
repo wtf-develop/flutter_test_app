@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
+import 'package:udp_hole/common/network/client.dart';
 
 import 'model.dart';
 
@@ -9,11 +10,34 @@ class FriendsList extends StatefulWidget {
   _FriendsListState createState() => _FriendsListState();
 }
 
-class _FriendsListState extends State<FriendsList> {
+class _FriendsListState extends State<FriendsList> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Provider.of<UserListModel>(context, listen: false).updateFromServer();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  AppLifecycleState _notification;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _notification = state;
+    switch (state) {
+      case AppLifecycleState.resumed:
+        NetworkClient().startServer();
+        break;
+      case AppLifecycleState.paused:
+        NetworkClient().stopServer();
+        break;
+    }
+    //setState(() { _notification = state; });
   }
 
   @override

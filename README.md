@@ -1,4 +1,4 @@
-# UDP hole punching
+# UDP hole punching [Work In Progress]
 https://en.wikipedia.org/wiki/UDP_hole_punching
 
 UDP hole punching establishes connectivity between two hosts communicating across one or more network address translators. Typically, third-party hosts on the public transit network are used to establish UDP port states that may be used for direct communications between the communicating hosts. Once port state has been successfully established and the hosts are communicating, port state may be maintained either by normal communications traffic, or in the prolonged absence thereof, by keep-alive packets, usually consisting of empty UDP packets or packets with minimal non-intrusive content. 
