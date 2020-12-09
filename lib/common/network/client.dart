@@ -18,6 +18,7 @@ class NetworkClient {
   static final LocalStorage _localStorage = LocalStorage();
 
   static const _SERVER_PORT = 65002;
+  static const _REPEAT_DELAY = 10000; //seconds
 
   Future<void> fetchOnlineUsers() async {
     if (_localStorage.getMyUniqId().length < 10) return Future.value();
@@ -48,8 +49,8 @@ class NetworkClient {
     _local_server = await UDP.bind(Endpoint.any(port: Port(_SERVER_PORT)));
 
     //periodic request to server
-    _timer =
-        Timer.periodic(Duration(seconds: 10), (Timer t) => fetchOnlineUsers());
+    _timer = Timer.periodic(
+        Duration(milliseconds: _REPEAT_DELAY), (Timer t) => fetchOnlineUsers());
     if (_streamOnline == null) {
       _streamOnline = _generateStream();
     }
@@ -70,7 +71,7 @@ class NetworkClient {
         _lastUsersList[index].ipv4 = user.ipv4;
         _lastUsersList[index].port = user.port;
       }
-
+      _lastUsersList[index].lastOnline = user.lastOnline;
       _lastUsersList[index].publicName = user.publicName;
     }
   }
@@ -126,26 +127,30 @@ class NetworkClient {
             dev.log("Client receive: " + str);
           }
 
+          var time = DateTime.now().millisecondsSinceEpoch;
           users.users.forEach((user) {
-            user.lan=false;
+            user.lan = false;
+            user.lastOnline = time;
             if (user.port == 0 && user.ipv4.length == 0) {
               user.ipv4 = datagram.address.address;
               user.port = datagram.port;
-              user.lan=true;
+              user.lan = true;
               _addToStreamArr(user, true);
-            }else{
-              user.lan=false;
+            } else {
+              user.lan = false;
               _addToStreamArr(user, false);
             }
           });
-          /*List<User> localUsers = users.users.where((user) {
-            return user.lan;
-          });
+          List<User> localUsers =
+              users.users.where((userItem) => userItem.lan).toList();
 
           _localStorage.addContactsArr(localUsers.map((localUser) {
-            return MyContact(localUser.id, "", localUser.ipv4,
-                DateTime.now().millisecondsSinceEpoch, 0);
-          }));*/
+            return MyContact(localUser.id, "", localUser.ipv4, time, 0);
+          }).toList());
+          _lastUsersList = _lastUsersList
+              .where((user) =>
+                  (user.lastOnline >= (time - (_REPEAT_DELAY * 2) - 1)))
+              .toList();
           _streamOnline?.add(_lastUsersList);
         }
       }, timeout: Duration(seconds: 200));

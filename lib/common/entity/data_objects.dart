@@ -8,7 +8,7 @@ part 'data_objects.g.dart';
 
 @JsonSerializable()
 class User implements Comparable<User> {
-  User(this.publicName,this.id, this.ipv4, this.port);
+  User(this.publicName, this.id, this.ipv4, this.port);
 
   @JsonKey(name: "u", required: true, disallowNullValue: true)
   String id = "";
@@ -22,11 +22,14 @@ class User implements Comparable<User> {
   @JsonKey(name: "n", defaultValue: "")
   String publicName = "";
 
-  @JsonKey(ignore: true,required: false)
+  @JsonKey(ignore: true, required: false)
   String _privateName = "";
 
-  @JsonKey(ignore: true,required: false)
+  @JsonKey(ignore: true, required: false)
   bool lan = false;
+
+  @JsonKey(ignore: true, required: false)
+  int lastOnline = 0;
 
   @JsonKey(ignore: true, required: false)
   String get visibleName => (_privateName.isEmpty

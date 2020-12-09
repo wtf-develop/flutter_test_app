@@ -16,7 +16,6 @@ void main() {
   LocalStorage().init().then((_) {
     NetworkClient().startServer();
   });
-
 }
 
 class FriendlyChatApp extends StatelessWidget {

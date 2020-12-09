@@ -25,6 +25,7 @@ class LocalStorage {
       _sharedPrefs = value;
       _my_uniq_id = _sharedPrefs.getString("uniq_id");
       _nick_name = _sharedPrefs.getString("nick_name") ?? "";
+      getContacts();
       List<Future<bool>> list = [];
       if (_my_uniq_id == null) {
         final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
