@@ -1,7 +1,7 @@
-import 'package:udp_hole/common/network/client.dart';
+import 'package:udp_hole/udp_connection/model.dart';
 
 class MessagesListRepo {
-  var network = NetworkClient();
+  var network = UdpModel();
 
   Future<List<String>> getMessages() {
     return network.getMessages();

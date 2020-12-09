@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:udp_hole/udp_connection/model.dart';
 
-import 'common/network/client.dart';
-import 'common/repository/LocalStorage.dart';
 import 'view_chat/chat_screen.dart';
 import 'view_chat/model.dart';
 import 'view_friends/friends_list.dart';
@@ -13,9 +12,6 @@ void main() {
   runApp(
     FriendlyChatApp(),
   );
-  LocalStorage().init().then((_) {
-    NetworkClient().startServer();
-  });
 }
 
 class FriendlyChatApp extends StatelessWidget {
@@ -29,6 +25,7 @@ class FriendlyChatApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (context) => UserListModel()),
           ChangeNotifierProvider(create: (context) => ChatModel()),
+          Provider(create: (context) => UdpModel()),
         ],
         child: MaterialApp(
           title: 'UDP chat',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
-import 'package:udp_hole/common/network/client.dart';
+import 'package:udp_hole/udp_connection/model.dart';
 
 import 'model.dart';
 
@@ -31,10 +31,10 @@ class _FriendsListState extends State<FriendsList> with WidgetsBindingObserver {
     _notification = state;
     switch (state) {
       case AppLifecycleState.resumed:
-        NetworkClient().startServer();
+        Provider.of<UdpModel>(context).startServer();
         break;
       case AppLifecycleState.paused:
-        NetworkClient().stopServer();
+        Provider.of<UdpModel>(context).stopServer();
         break;
     }
     //setState(() { _notification = state; });
