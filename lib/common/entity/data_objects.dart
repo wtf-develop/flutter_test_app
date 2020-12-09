@@ -32,6 +32,10 @@ class User implements Comparable<User> {
   int lastOnline = 0;
 
   @JsonKey(ignore: true, required: false)
+  bool updateAddress = true;
+
+
+  @JsonKey(ignore: true, required: false)
   String get visibleName => (_privateName.isEmpty
       ? (publicName.isEmpty ? (ipv4) : (publicName))
       : _privateName);

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
+import 'dart:io';
+import 'dart:math';
 
 import 'package:udp/udp.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
@@ -19,18 +21,22 @@ class NetworkClient {
 
   static const _SERVER_PORT = 65002;
   static const _REPEAT_DELAY = 10000; //seconds
+  static const _SERVER_DOMAIN = "wtf-dev.ru";
+  static final _rnd=Random();
 
   Future<void> fetchOnlineUsers() async {
     if (_localStorage.getMyUniqId().length < 10) return Future.value();
-    IdsRequest ids = IdsRequest(
-        _localStorage.getMyUniqId(), _localStorage.getContacts().getIdsOnly());
-    /*await _local_server.send(
-        ("L" + jsonEncode(ids.toJson())).codeUnits,
-        Endpoint.unicast(InternetAddress("wtf-dew.ru"),
-            port: Port(_SERVER_PORT)));*/
 
-    ids = IdsRequest(_localStorage.getMyUniqId(), []);
-    await _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
+    InternetAddress.lookup(_SERVER_DOMAIN).then((value) {
+      if (value.length > 0) {
+        IdsRequest ids = IdsRequest(_localStorage.getMyUniqId(),
+            _localStorage.getContacts().getIdsOnly());
+        _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
+            Endpoint.unicast(value[_rnd.nextInt(value.length)%value.length], port: Port(_SERVER_PORT)));
+      }
+    });
+    IdsRequest ids = IdsRequest(_localStorage.getMyUniqId(), []);
+    _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.broadcast(port: Port(_SERVER_PORT)));
     return Future.value();
   }
@@ -65,11 +71,21 @@ class NetworkClient {
   void _addToStreamArr(User user, bool major) {
     var index = _lastUsersList.indexWhere((element) => element.id == user.id);
     if (index < 0) {
+      user.updateAddress = true;
       _lastUsersList.add(user);
     } else {
+      if ((_lastUsersList[index].ipv4 != user.ipv4) ||
+          (_lastUsersList[index].port != user.port)) {
+        _lastUsersList[index].updateAddress = true;
+      }
       if (major) {
         _lastUsersList[index].ipv4 = user.ipv4;
         _lastUsersList[index].port = user.port;
+      } else {
+        if ((!_lastUsersList[index].lan) && (!user.lan)) {
+          _lastUsersList[index].ipv4 = user.ipv4;
+          _lastUsersList[index].port = user.port;
+        }
       }
       _lastUsersList[index].lastOnline = user.lastOnline;
       _lastUsersList[index].publicName = user.publicName;
@@ -152,6 +168,16 @@ class NetworkClient {
                   (user.lastOnline >= (time - (_REPEAT_DELAY * 2) - 1)))
               .toList();
           _streamOnline?.add(_lastUsersList);
+          _lastUsersList.forEach((user) {
+            if (user.updateAddress) {
+              user.updateAddress = false;
+              IdsRequest ids = IdsRequest(_localStorage.getMyUniqId(), []);
+              _local_server.send(
+                  ("L" + jsonEncode(ids.toJson())).codeUnits,
+                  Endpoint.unicast(InternetAddress(user.ipv4),
+                      port: Port(_SERVER_PORT)));
+            }
+          });
         }
       }, timeout: Duration(seconds: 200));
     }
