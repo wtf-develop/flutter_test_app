@@ -6,27 +6,40 @@ import 'dart:math';
 import 'package:udp/udp.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
 
-class NetworkClient {
+class UdpRepository {
   static const _SERVER_PORT = 65002;
   static const _SERVER_DOMAIN = "wtf-dev.ru";
 
-  NetworkClient._privateConstructor() {
-    UDP
-        .bind(Endpoint.any(port: Port(_SERVER_PORT)))
-        .then((value) => _local_server = value);
+  UdpRepository._privateConstructor() {
+    openConnection();
   }
 
-  static final NetworkClient _instance = NetworkClient._privateConstructor();
+  static final UdpRepository _instance = UdpRepository._privateConstructor();
 
-  factory NetworkClient() {
+  factory UdpRepository() {
     return _instance;
+  }
+
+  void closeConnection() {
+    _local_server?.close();
+    _local_server = null;
+  }
+
+  Future openConnection() async {
+    if (_local_server != null) {
+      return;
+    }
+    return UDP
+        .bind(Endpoint.any(port: Port(_SERVER_PORT)))
+        .then((value) => _local_server = value)
+        .then((value) => Future.value());
   }
 
   static final _rnd = Random();
   UDP _local_server = null;
 
-  Future<void> fetchOnlineUsers(String my_uid, List<String> ids_list) async {
-    if (my_uid.length < 10) return Future.value();
+  void fetchOnlineUsers(String my_uid, List<String> ids_list) {
+    if (my_uid.length < 10) return;
 
     InternetAddress.lookup(_SERVER_DOMAIN).then((value) {
       if (value.length > 0) {
@@ -41,12 +54,11 @@ class NetworkClient {
     IdsRequest ids = IdsRequest(my_uid, []);
     _local_server?.send(("L" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.broadcast(port: Port(_SERVER_PORT)));
-    return Future.value();
   }
 
   UDP getConnection() => _local_server;
 
-  void processListRequest(String my_uid, String my_nick,
+  Future<int> processListRequest(String my_uid, String my_nick,
       InternetAddress address, int port, IdsRequest ids) {
     if (ids.sender == my_uid) {
       dev.log("Server myself");
@@ -54,7 +66,7 @@ class NetworkClient {
       dev.log("Server");
     }
 
-    _local_server.send(
+    return _local_server.send(
         ("U" +
                 jsonEncode((UsersList(my_uid, [User(my_nick, my_uid, "", 0)]))
                     .toJson()))
@@ -62,15 +74,15 @@ class NetworkClient {
         Endpoint.unicast(address, port: Port(port)));
   }
 
-  void sendListRequest(String my_uid, String ip, int port) {
+  Future<int> sendListRequest(String my_uid, String ip, int port) {
     IdsRequest ids = IdsRequest(my_uid, []);
-    _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
+    return _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
 
-  void sendClosedSignal(String my_uid, String ip, int port) {
+  Future<int> sendClosedSignal(String my_uid, String ip, int port) {
     IdsRequest ids = IdsRequest(my_uid, []);
-    _local_server.send(("D" + jsonEncode(ids.toJson())).codeUnits,
+    return _local_server.send(("D" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
 }

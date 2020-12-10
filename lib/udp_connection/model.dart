@@ -6,7 +6,8 @@ import 'dart:io';
 import 'package:udp_hole/common/entity/data_objects.dart';
 import 'package:udp_hole/common/repository/LocalStorage.dart';
 
-import 'client.dart';
+import 'online_users.dart';
+import 'repository.dart';
 
 class UdpModel {
   UdpModel._privateConstructor() {
@@ -21,15 +22,15 @@ class UdpModel {
     return _instance;
   }
 
-  var repo = NetworkClient();
-  static final LocalStorage _localStorage = LocalStorage();
+  UdpRepository _repo = UdpRepository();
+  LocalStorage _localStorage = LocalStorage();
+  OnlineUsers _lastUsersObject = OnlineUsers();
 
   static const _REPEAT_DELAY = 10000; //seconds
 
-  Future<void> fetchOnlineUsers() async {
-    repo.fetchOnlineUsers(
+  void fetchOnlineUsers() {
+    _repo.fetchOnlineUsers(
         _localStorage.getMyUniqId(), _localStorage.getContacts().getIdsOnly());
-    return Future.value();
   }
 
   Future<List<String>> getMessages() {
@@ -44,13 +45,11 @@ class UdpModel {
   Future<void> startServer() async {
     if (_localStorage.getMyUniqId().length < 10) return;
     if (_serverOnline) return Future.value();
-
+    await _repo.openConnection();
     //periodic request to server
     _timer = Timer.periodic(
         Duration(milliseconds: _REPEAT_DELAY), (Timer t) => fetchOnlineUsers());
-    if (_streamOnline == null) {
-      _streamOnline = _generateStream();
-    }
+    _lastUsersObject.openStream();
     _serverOnline = true;
     fetchOnlineUsers(); //inital request to server
     await _internal_serverLoop(); //infinit loop
@@ -60,59 +59,24 @@ class UdpModel {
   void stopServer() {
     if (_serverOnline) {
       _serverOnline = false;
-      _lastUsersList.forEach((user) {
-        repo.sendClosedSignal(
-            _localStorage.getMyUniqId(), user.ipv4, user.port);
+      List<Future> listFuture = [];
+      _lastUsersObject.getList().forEach((user) {
+        listFuture.add(_repo.sendClosedSignal(
+            _localStorage.getMyUniqId(), user.ipv4, user.port));
       });
       _timer.cancel();
-      _streamOnline.close();
-      _streamOnline = null;
+      _lastUsersObject.closeStream();
+      Future.wait(listFuture).then((value) => _repo.closeConnection());
     }
   }
-
-  List<User> _lastUsersList = [];
-
-  void _addToStreamArr(User user, bool major) {
-    var index = _lastUsersList.indexWhere((element) => element.id == user.id);
-    if (index < 0) {
-      user.updateAddress = !user.lan;
-      _lastUsersList.add(user);
-    } else {
-      if ((_lastUsersList[index].ipv4 != user.ipv4) ||
-          (_lastUsersList[index].port != user.port)) {
-        _lastUsersList[index].updateAddress = !user.lan;
-      }
-      if (major) {
-        _lastUsersList[index].ipv4 = user.ipv4;
-        _lastUsersList[index].port = user.port;
-      } else {
-        if ((!_lastUsersList[index].lan) && (!user.lan)) {
-          _lastUsersList[index].ipv4 = user.ipv4;
-          _lastUsersList[index].port = user.port;
-        }
-      }
-      _lastUsersList[index].lastOnline = user.lastOnline;
-      _lastUsersList[index].publicName = user.publicName;
-    }
-  }
-
-  StreamController<List<User>> _streamOnline = StreamController(sync: false);
-
-  StreamController<List<User>> _generateStream() => StreamController(
-      onListen: () {
-        if (_lastUsersList.isNotEmpty) {
-          _streamOnline.add(_lastUsersList);
-        }
-      },
-      sync: false);
 
   Stream<List<User>> getUsersListStream() {
-    return _streamOnline.stream;
+    return _lastUsersObject.getStream();
   }
 
   Future<void> _internal_serverLoop() async {
     while (_serverOnline) {
-      await repo.getConnection().listen((datagram) {
+      await _repo.getConnection().listen((datagram) {
         if (_localStorage.getMyUniqId().length < 10) return;
         var str = String.fromCharCodes(datagram.data);
         dev.log(datagram.address.toString() + str);
@@ -120,7 +84,7 @@ class UdpModel {
 
         if (str.startsWith("L{")) {
           var ids = IdsRequest.fromJson(response);
-          repo.processListRequest(
+          _repo.processListRequest(
               _localStorage.getMyUniqId(),
               _localStorage.getNickname(),
               datagram.address,
@@ -131,8 +95,7 @@ class UdpModel {
               _localStorage.getMyUniqId(), datagram, response);
         } else if (str.startsWith("D{")) {
           var ids = IdsRequest.fromJson(response);
-          _lastUsersList.removeWhere((element) => element.id == ids.sender);
-          if (_serverOnline) _streamOnline?.add(_lastUsersList);
+          if (_serverOnline) _lastUsersObject.remove(ids.sender);
         }
       }, timeout: Duration(seconds: 200));
     }
@@ -157,26 +120,24 @@ class UdpModel {
         user.ipv4 = datagram.address.address;
         user.port = datagram.port;
         user.lan = true;
-        _addToStreamArr(user, true);
       } else {
         user.lan = false;
-        _addToStreamArr(user, false);
       }
     });
+    _lastUsersObject.addAll(users.users);
     List<User> localUsers =
         users.users.where((userItem) => userItem.lan).toList();
 
     _localStorage.addContactsArr(localUsers.map((localUser) {
       return MyContact(localUser.id, "", localUser.ipv4, time, 0);
     }).toList());
-    _lastUsersList = _lastUsersList
-        .where((user) => (user.lastOnline >= (time - (_REPEAT_DELAY * 2) - 1)))
-        .toList();
-    if (_serverOnline) _streamOnline?.add(_lastUsersList);
-    _lastUsersList.forEach((user) {
+
+    if (_serverOnline) _lastUsersObject.removeWithTimeout(_REPEAT_DELAY * 2);
+    _lastUsersObject.getList().forEach((user) {
       if (user.updateAddress && (!user.lan)) {
         user.updateAddress = false;
-        repo.sendListRequest(_localStorage.getMyUniqId(), user.ipv4, user.port);
+        _repo.sendListRequest(
+            _localStorage.getMyUniqId(), user.ipv4, user.port);
       }
     });
   }

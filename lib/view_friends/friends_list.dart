@@ -31,10 +31,10 @@ class _FriendsListState extends State<FriendsList> with WidgetsBindingObserver {
     _notification = state;
     switch (state) {
       case AppLifecycleState.resumed:
-        Provider.of<UdpModel>(context).startServer();
+        Provider.of<UdpModel>(context, listen: false).startServer();
         break;
       case AppLifecycleState.paused:
-        Provider.of<UdpModel>(context).stopServer();
+        Provider.of<UdpModel>(context, listen: false).stopServer();
         break;
     }
     //setState(() { _notification = state; });
