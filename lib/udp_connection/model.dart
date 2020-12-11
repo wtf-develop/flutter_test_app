@@ -10,11 +10,7 @@ import 'online_users.dart';
 import 'repository.dart';
 
 class UdpModel {
-  UdpModel._privateConstructor() {
-    _localStorage.init().then((_) {
-      startServer();
-    });
-  }
+  UdpModel._privateConstructor();
 
   static final UdpModel _instance = UdpModel._privateConstructor();
 
@@ -42,18 +38,10 @@ class UdpModel {
   var _serverOnline = false;
   Timer _timer;
 
-  Future<void> startServer() async {
-    if (_localStorage.getMyUniqId().length < 10) return;
-    if (_serverOnline) return Future.value();
-    await _repo.openConnection();
-    //periodic request to server
-    _timer = Timer.periodic(
-        Duration(milliseconds: _REPEAT_DELAY), (Timer t) => fetchOnlineUsers());
-    _lastUsersObject.openStream();
-    _serverOnline = true;
-    fetchOnlineUsers(); //inital request to server
-    await _internal_serverLoop(); //infinit loop
-    return Future.value();
+  startServer() {
+    _localStorage.init().then((_) {
+      _internal_startServer();
+    });
   }
 
   void stopServer() {
@@ -68,6 +56,28 @@ class UdpModel {
       _lastUsersObject.closeStream();
       Future.wait(listFuture).then((value) => _repo.closeConnection());
     }
+  }
+
+  Future<void> _internal_startServer() async {
+    if (_localStorage.getMyUniqId().length < 10) return;
+    if (_serverOnline) return Future.value();
+    _serverOnline = true;
+    await _repo.openConnection();
+    //periodic request to server
+    _lastUsersObject.openStream();
+
+    List<Future> listFuture = [];
+    _lastUsersObject.getList().forEach((user) {
+      listFuture.add(_repo.sendOpenSignal(_localStorage.getMyUniqId(),
+          _localStorage.getNickname(), user.ipv4, user.port));
+    });
+    Future.wait(listFuture).then((value) {
+      _timer = Timer.periodic(Duration(milliseconds: _REPEAT_DELAY),
+          (Timer t) => fetchOnlineUsers());
+    });
+    fetchOnlineUsers(); //inital request to server
+    await _internal_serverLoop(); //infinit loop
+    return Future.value();
   }
 
   Stream<List<User>> getUsersListStream() {
@@ -97,7 +107,7 @@ class UdpModel {
           var ids = IdsRequest.fromJson(response);
           if (_serverOnline) _lastUsersObject.remove(ids.sender);
         }
-      }, timeout: Duration(seconds: 200));
+      }, timeout: Duration(seconds: 100));
     }
     return Future.value();
   }

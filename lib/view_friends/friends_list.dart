@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
-import 'package:udp_hole/udp_connection/model.dart';
 
 import 'model.dart';
 
@@ -10,34 +9,11 @@ class FriendsList extends StatefulWidget {
   _FriendsListState createState() => _FriendsListState();
 }
 
-class _FriendsListState extends State<FriendsList> with WidgetsBindingObserver {
+class _FriendsListState extends State<FriendsList> {
   @override
   void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
     Provider.of<UserListModel>(context, listen: false).updateFromServer();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  AppLifecycleState _notification;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    _notification = state;
-    switch (state) {
-      case AppLifecycleState.resumed:
-        Provider.of<UdpModel>(context, listen: false).startServer();
-        break;
-      case AppLifecycleState.paused:
-        Provider.of<UdpModel>(context, listen: false).stopServer();
-        break;
-    }
-    //setState(() { _notification = state; });
+    super.initState();
   }
 
   @override

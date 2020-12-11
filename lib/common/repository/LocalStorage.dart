@@ -22,8 +22,6 @@ class LocalStorage {
 
   Future<bool> init() {
     if (_sharedPrefs != null) {
-      _my_uniq_id = _sharedPrefs.getString("uniq_id");
-      _nick_name = _sharedPrefs.getString("nick_name") ?? "";
       return Future.value(true);
     }
     return SharedPreferences.getInstance().then((value) {

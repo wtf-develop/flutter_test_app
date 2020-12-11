@@ -85,4 +85,14 @@ class UdpRepository {
     return _local_server.send(("D" + jsonEncode(ids.toJson())).codeUnits,
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
+
+  Future<int> sendOpenSignal(
+      String my_uid, String my_nick, String ip, int port) {
+    return _local_server.send(
+        ("U" +
+                jsonEncode((UsersList(my_uid, [User(my_nick, my_uid, "", 0)]))
+                    .toJson()))
+            .codeUnits,
+        Endpoint.unicast(InternetAddress(ip), port: Port(port)));
+  }
 }
