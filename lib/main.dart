@@ -37,19 +37,19 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
     super.dispose();
   }
 
-  AppLifecycleState _lifecicle_state;
+  AppLifecycleState _lifecycleState;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_lifecicle_state == null) {
+    if (_lifecycleState == null) {
       didChangeAppLifecycleState(AppLifecycleState.resumed);
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _lifecicle_state = state;
+    _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:
         UdpModel().startServer();
@@ -58,9 +58,9 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
         UdpModel().stopServer();
         break;
     }
-    setState(() {
-      _lifecicle_state = state;
-    });
+    /*setState(() {
+      _lifecycleState = state;
+    });*/
   }
 
   @override
@@ -72,12 +72,11 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
           //Provider(create: (context) => UdpModel()),
         ],
         child: MaterialApp(
+          theme: ThemeData(fontFamily: 'Montserrat'),
           title: 'UDP chat',
           initialRoute: '/',
           routes: {
-            // When navigating to the "/" route, build the FirstScreen widget.
             '/': (context) => FriendsList(),
-            // When navigating to the "/second" route, build the SecondScreen widget.
             '/chat': (context) => ChatScreen(),
           },
         ));

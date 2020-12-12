@@ -22,6 +22,8 @@ class User implements Comparable<User> {
   @JsonKey(name: "n", defaultValue: "")
   String publicName = "";
 
+
+  //internal app values
   @JsonKey(ignore: true, required: false)
   String _privateName = "";
 
@@ -35,9 +37,12 @@ class User implements Comparable<User> {
   bool updateAddress = true;
 
   @JsonKey(ignore: true, required: false)
+  int onlineState = 0; //0-offline, 1-online from server, 2-direct connection
+
+  @JsonKey(ignore: true, required: false)
   String get visibleName => (_privateName.isEmpty
       ? (publicName.isEmpty ? (ipv4) : (publicName))
-      : _privateName);
+      : (_privateName + "\n" + publicName + "\n" + ipv4));
 
   set visibleName(String name) => _privateName = name;
 
