@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
@@ -20,7 +21,15 @@ class _FriendsListState extends State<FriendsList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('UDP-hole-punching-chat'),
+        title: Row(
+          children: [
+            Container(
+              child: Icon(Icons.supervised_user_circle_outlined),
+              padding: EdgeInsets.only(right: 15.0),
+            ),
+            Text('UDP-hole-punching-chat'),
+          ],
+        ),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
       ),
       body: Consumer<UserListModel>(builder: (context, user, child) {
@@ -42,12 +51,22 @@ class _FriendsListState extends State<FriendsList> {
         //create dynamic list for big item count
         Widget _buildUserList() {
           var arr = user.items;
-          return ListView.builder(
-              itemCount: arr.length,
-              padding: EdgeInsets.all(16.0),
-              itemBuilder: (context, i) {
-                return _buildRow(arr[i]);
-              });
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: CachedNetworkImageProvider(
+                  'https://wtf-dev.ru/sync/login/img/back.jpg',
+                ),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: ListView.builder(
+                itemCount: arr.length,
+                padding: EdgeInsets.all(16.0),
+                itemBuilder: (context, i) {
+                  return _buildRow(arr[i]);
+                }),
+          );
         }
 
         if (user.items.isEmpty && user.requestInProgress) {

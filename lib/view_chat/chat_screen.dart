@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -99,28 +100,46 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Online Chat'),
+        title: Row(
+          children: [
+            Container(
+              child: Icon(Icons.chat_bubble_outline),
+              padding: EdgeInsets.only(right: 15.0),
+            ),
+            Text('Online Chat'),
+          ],
+        ),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
       ),
       body: Consumer<ChatModel>(
         builder: (context, chat, child) {
-          return Column(
-            children: [
-              Flexible(
-                child: ListView.builder(
-                  padding: EdgeInsets.all(8.0),
-                  reverse: true,
-                  itemBuilder: (_, int index) => _buildMessage(
-                      chat.chatSize(), chat.getOneMessage(index), index),
-                  itemCount: chat.chatSize(),
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: CachedNetworkImageProvider(
+                  'https://wtf-dev.ru/sync/login/img/back.jpg',
                 ),
+                fit: BoxFit.cover,
               ),
-              Divider(height: 1.0),
-              Container(
-                decoration: BoxDecoration(color: Theme.of(context).cardColor),
-                child: _buildTextComposer(chat),
-              ),
-            ],
+            ),
+            child: Column(
+              children: [
+                Flexible(
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(8.0),
+                    reverse: true,
+                    itemBuilder: (_, int index) => _buildMessage(
+                        chat.chatSize(), chat.getOneMessage(index), index),
+                    itemCount: chat.chatSize(),
+                  ),
+                ),
+                Divider(height: 1.0),
+                Container(
+                  decoration: BoxDecoration(color: Theme.of(context).cardColor),
+                  child: _buildTextComposer(chat),
+                ),
+              ],
+            ),
           );
         },
       ),

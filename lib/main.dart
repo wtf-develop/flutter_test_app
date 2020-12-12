@@ -72,7 +72,8 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
           //Provider(create: (context) => UdpModel()),
         ],
         child: MaterialApp(
-          theme: ThemeData(fontFamily: 'Montserrat'),
+          theme:
+              ThemeData(fontFamily: 'Montserrat', brightness: Brightness.dark),
           title: 'UDP chat',
           initialRoute: '/',
           routes: {
