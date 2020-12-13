@@ -21,6 +21,7 @@ class _FriendsListState extends State<FriendsList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.grey[900],
         title: Row(
           children: [
             Container(
@@ -41,6 +42,7 @@ class _FriendsListState extends State<FriendsList> {
             ),
             trailing: Icon(
               Icons.supervised_user_circle_rounded,
+              color: user.lan ? Colors.green[900] : Colors.cyan[800],
             ),
             onTap: () {
               Navigator.pushNamed(context, '/chat');
