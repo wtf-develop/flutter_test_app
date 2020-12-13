@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
 
@@ -23,11 +24,15 @@ class _FriendsListState extends State<FriendsList> {
       appBar: AppBar(
         backgroundColor: Colors.grey[900],
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              child: Icon(Icons.supervised_user_circle_outlined),
-              padding: EdgeInsets.only(right: 15.0),
+            SpinKitRipple(
+              color: Theme.of(context).accentColor, //hintColor,
+              size: 35.0,
+            ),
+            SizedBox(
+              width: 20.0,
             ),
             Expanded(
                 child: Text(
@@ -45,10 +50,14 @@ class _FriendsListState extends State<FriendsList> {
             title: Text(
               user.visibleName,
             ),
-            trailing: Icon(
+            trailing: SpinKitCubeGrid(
+              color: user.lan ? Colors.green[900] : Colors.cyan[800],
+              size: 20.0,
+            ),
+            /*trailing: Icon(
               Icons.supervised_user_circle_rounded,
               color: user.lan ? Colors.green[900] : Colors.cyan[800],
-            ),
+            ),*/
             onTap: () {
               Navigator.pushNamed(context, '/chat', arguments: {'id': user.id});
             },
@@ -77,7 +86,12 @@ class _FriendsListState extends State<FriendsList> {
         }
 
         if (user.items.isEmpty && user.requestInProgress) {
-          return Center(child: CircularProgressIndicator());
+          //return Center(child: CircularProgressIndicator());
+          return Center(
+              child: SpinKitFadingCube(
+            color: Theme.of(context).accentColor,
+            size: 80.0,
+          ));
         } else {
           return _buildUserList();
         }
