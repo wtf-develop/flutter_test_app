@@ -22,7 +22,6 @@ class User implements Comparable<User> {
   @JsonKey(name: "n", defaultValue: "")
   String publicName = "";
 
-
   //internal app values
   @JsonKey(ignore: true, required: false)
   String _privateName = "";

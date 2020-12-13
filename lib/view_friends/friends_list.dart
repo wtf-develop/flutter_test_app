@@ -23,12 +23,17 @@ class _FriendsListState extends State<FriendsList> {
       appBar: AppBar(
         backgroundColor: Colors.grey[900],
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Container(
               child: Icon(Icons.supervised_user_circle_outlined),
               padding: EdgeInsets.only(right: 15.0),
             ),
-            Text('UDP-hole-punching-chat'),
+            Expanded(
+                child: Text(
+              'UDP-hole-punching-chat',
+              overflow: TextOverflow.fade,
+            )),
           ],
         ),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
@@ -45,7 +50,7 @@ class _FriendsListState extends State<FriendsList> {
               color: user.lan ? Colors.green[900] : Colors.cyan[800],
             ),
             onTap: () {
-              Navigator.pushNamed(context, '/chat');
+              Navigator.pushNamed(context, '/chat', arguments: {'id': user.id});
             },
           );
         }

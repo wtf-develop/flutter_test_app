@@ -49,7 +49,9 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _lifecycleState = state;
+    if (state == _lifecycleState) {
+      return;
+    }
     switch (state) {
       case AppLifecycleState.resumed:
         UdpModel().startServer();
@@ -57,7 +59,11 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
       case AppLifecycleState.paused:
         UdpModel().stopServer();
         break;
+      default:
+        return;
     }
+    _lifecycleState = state;
+
     /*setState(() {
       _lifecycleState = state;
     });*/
@@ -73,11 +79,10 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
         ],
         child: MaterialApp(
           theme: ThemeData(
-            fontFamily: 'Montserrat',
-            brightness: Brightness.dark,
-            accentColor: Colors.amber,
-            colorScheme: ColorScheme.dark()
-          ),
+              fontFamily: 'Montserrat',
+              brightness: Brightness.dark,
+              accentColor: Colors.amber,
+              colorScheme: ColorScheme.dark()),
           title: 'UDP chat',
           initialRoute: '/',
           routes: {

@@ -15,6 +15,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  Map data;
+
   void _handleSubmitted(String text, ChatModel chat) {
     _textController.clear();
 
@@ -84,6 +86,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   void initState() {
     super.initState();
+
     Provider.of<ChatModel>(context, listen: false).getMessages();
   }
 
@@ -98,17 +101,24 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (data == null) data = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[900],
-        title: Row(
-          children: [
-            Container(
-              child: Icon(Icons.chat_bubble_outline),
-              padding: EdgeInsets.only(right: 15.0),
-            ),
-            Text('Online Chat'),
-          ],
+        title: Flexible(
+          child: Row(
+            children: [
+              Container(
+                child: Icon(Icons.chat_bubble_outline),
+                padding: EdgeInsets.only(right: 15.0),
+              ),
+              Expanded(
+                  child: Text(
+                data['id'] + ' Chat',
+                overflow: TextOverflow.fade,
+              )),
+            ],
+          ),
         ),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
       ),
