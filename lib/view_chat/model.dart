@@ -1,39 +1,40 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:udp_hole/common/entity/data_objects.dart';
+import 'package:udp_hole/common/repository/LocalStorage.dart';
 import 'package:udp_hole/view_chat/repository.dart';
 
-class DataMessage {
-  String from, message;
-
-  DataMessage(this.from, this.message);
-}
-
 class ChatModel extends ChangeNotifier {
-  final List<DataMessage> _messages = List<DataMessage>();
+  final List<UserMessage> _messages = List<UserMessage>();
   bool _canSend = false;
   final MessagesListRepo _repo = MessagesListRepo();
 
   bool get canSend => _canSend;
 
-  UnmodifiableListView<DataMessage> get messages =>
+  UnmodifiableListView<UserMessage> get messages =>
       UnmodifiableListView(_messages);
 
   int chatSize() => _messages.length;
 
-  DataMessage getOneMessage(int index) => _messages[index];
+  UserMessage getOneMessage(int index) => _messages[index];
 
   void getMessages() {
     _repo.getMessages().then((value) {
       value.forEach((element) {
-        _messages.add(DataMessage("Other", element));
+        _messages.add(UserMessage("Other", "to", element, 0, 0));
       });
       notifyListeners();
     });
   }
 
-  void add(String from, String message) {
-    _messages.insert(0, DataMessage(from, message));
+  LocalStorage _localStorage = LocalStorage();
+
+  void add(String to, String message) {
+    var userMessage =
+        UserMessage(_localStorage.getMyUniqId(), to, message, 0, 0);
+    _messages.insert(0, userMessage);
+    _repo.sendMessage(userMessage);
     _canSend = false;
     notifyListeners();
   }

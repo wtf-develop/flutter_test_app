@@ -39,6 +39,7 @@ class UdpModel {
   var _serverOnline = false;
   Timer _timer;
 
+
   startServer() {
     _localStorage.init().then((_) {
       _internal_startServer();
@@ -61,6 +62,18 @@ class UdpModel {
 
   Stream<List<User>> getUsersListStream() {
     return _lastUsersObject.getStream();
+  }
+
+  void sendMessage(UserMessage mess){
+    var user=_getUserById(mess.to);
+    if(user.port>0) {
+      _repo.sendMessage2User(mess.from, mess.to, mess.message, user.ipv4, user.port);
+    }
+  }
+
+  User _getUserById(String id){
+    return _lastUsersObject.getList().firstWhere((element) => element.id==id,orElse: ()=>User("","","",0));
+
   }
 
   Future<void> _internal_startServer() async {

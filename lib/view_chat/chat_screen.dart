@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:udp_hole/common/entity/data_objects.dart';
 
 import 'message_row.dart';
 import 'model.dart';
@@ -17,11 +18,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final FocusNode _focusNode = FocusNode();
 
   Map data;
-
   void _handleSubmitted(String text, ChatModel chat) {
     _textController.clear();
-
-    chat.add("Me", text);
+    chat.add(data['id'], text);
     _focusNode.requestFocus();
   }
 
@@ -65,7 +64,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   List<MessageRow> _view_messages = [];
 
-  Widget _buildMessage(int totalCount, DataMessage data, index) {
+  Widget _buildMessage(int totalCount, UserMessage data, index) {
     if (totalCount <= _view_messages.length) {
       if ((_view_messages[index] != null)) {
         /////_view_messages[index].setText(data.from, data.message);
@@ -85,9 +84,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     return message;
   }
 
+  ChatModel chatModel;
   void initState() {
     super.initState();
-
     Provider.of<ChatModel>(context, listen: false).getMessages();
   }
 
