@@ -50,14 +50,14 @@ class _FriendsListState extends State<FriendsList> {
             title: Text(
               user.visibleName,
             ),
-            trailing: SpinKitCubeGrid(
+            /*trailing: SpinKitCubeGrid(
               color: user.lan ? Colors.green[900] : Colors.cyan[800],
               size: 20.0,
-            ),
-            /*trailing: Icon(
+            ),*/
+            trailing: Icon(
               Icons.supervised_user_circle_rounded,
               color: user.lan ? Colors.green[900] : Colors.cyan[800],
-            ),*/
+            ),
             onTap: () {
               Navigator.pushNamed(context, '/chat', arguments: {'id': user.id});
             },
