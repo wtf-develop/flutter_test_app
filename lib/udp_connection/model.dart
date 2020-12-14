@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:io';
 
+import 'package:pedantic/pedantic.dart';
 import 'package:udp_hole/common/entity/data_objects.dart';
 import 'package:udp_hole/common/repository/LocalStorage.dart';
 
@@ -58,14 +59,16 @@ class UdpModel {
     }
   }
 
+  Stream<List<User>> getUsersListStream() {
+    return _lastUsersObject.getStream();
+  }
+
   Future<void> _internal_startServer() async {
     if (_localStorage.getMyUniqId().length < 10) return;
     if (_serverOnline) return Future.value();
     _serverOnline = true;
     await _repo.openConnection();
-    //periodic request to server
     _lastUsersObject.openStream();
-
     List<Future> listFuture = [];
     _lastUsersObject.getList().forEach((user) {
       listFuture.add(_repo.sendOpenSignal(_localStorage.getMyUniqId(),
@@ -80,35 +83,26 @@ class UdpModel {
     return Future.value();
   }
 
-  Stream<List<User>> getUsersListStream() {
-    return _lastUsersObject.getStream();
-  }
-
   Future<void> _internal_serverLoop() async {
-    while (_serverOnline) {
-      await _repo.getConnection().listen((datagram) {
-        if (_localStorage.getMyUniqId().length < 10) return;
-        var str = String.fromCharCodes(datagram.data);
-        dev.log(datagram.address.toString() + str);
-        Map response = jsonDecode(str.substring(1));
+    //while (_serverOnline) {
+    unawaited(_repo.getConnection().listen((datagram) {
+      if (_localStorage.getMyUniqId().length < 10) return;
+      var str = String.fromCharCodes(datagram.data);
+      dev.log(datagram.address.toString() + str);
+      Map response = jsonDecode(str.substring(1));
 
-        if (str.startsWith("L{")) {
-          var ids = IdsRequest.fromJson(response);
-          _repo.processListRequest(
-              _localStorage.getMyUniqId(),
-              _localStorage.getNickname(),
-              datagram.address,
-              datagram.port,
-              ids);
-        } else if (str.startsWith("U{")) {
-          _processUsersResponse(
-              _localStorage.getMyUniqId(), datagram, response);
-        } else if (str.startsWith("D{")) {
-          var ids = IdsRequest.fromJson(response);
-          if (_serverOnline) _lastUsersObject.remove(ids.sender);
-        }
-      }, timeout: Duration(seconds: 100));
-    }
+      if (str.startsWith("L{")) {
+        var ids = IdsRequest.fromJson(response);
+        _repo.processListRequest(_localStorage.getMyUniqId(),
+            _localStorage.getNickname(), datagram.address, datagram.port, ids);
+      } else if (str.startsWith("U{")) {
+        _processUsersResponse(_localStorage.getMyUniqId(), datagram, response);
+      } else if (str.startsWith("D{")) {
+        var ids = IdsRequest.fromJson(response);
+        if (_serverOnline) _lastUsersObject.remove(ids.sender);
+      }
+    }));
+    //}
     return Future.value();
   }
 
