@@ -147,3 +147,28 @@ class MyContactsList {
 
   Map<String, dynamic> toJson() => _$MyContactsListToJson(this);
 }
+
+@JsonSerializable()
+class UserMessage {
+  UserMessage(this.from, this.to, this.message, this.created, this.status);
+
+  @JsonKey(name: "f", required: true, defaultValue: "")
+  String from = "";
+
+  @JsonKey(name: "t", required: true, defaultValue: "")
+  String to = "";
+
+  @JsonKey(name: "m", required: true, defaultValue: "")
+  String message = "";
+
+  @JsonKey(name: "c", required: false, defaultValue: 0)
+  int created = 0;
+
+  @JsonKey(name: "s", required: false, defaultValue: 0)
+  int status = 0;
+
+  factory UserMessage.fromJson(Map<String, dynamic> json) =>
+      _$UserMessageFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserMessageToJson(this);
+}

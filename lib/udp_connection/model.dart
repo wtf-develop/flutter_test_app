@@ -92,12 +92,15 @@ class UdpModel {
       Map response = jsonDecode(str.substring(1));
 
       if (str.startsWith("L{")) {
+        // need to send list of devices for response on this request with "U{"
         var ids = IdsRequest.fromJson(response);
         _repo.processListRequest(_localStorage.getMyUniqId(),
             _localStorage.getNickname(), datagram.address, datagram.port, ids);
       } else if (str.startsWith("U{")) {
+        // we receive a list of online devices here
         _processUsersResponse(_localStorage.getMyUniqId(), datagram, response);
       } else if (str.startsWith("D{")) {
+        // we receive message that online user disable application
         var ids = IdsRequest.fromJson(response);
         if (_serverOnline) _lastUsersObject.remove(ids.sender);
       }

@@ -29,7 +29,7 @@ class _FriendsListState extends State<FriendsList> {
           children: [
             SpinKitRipple(
               color: Theme.of(context).accentColor, //hintColor,
-              size: 35.0,
+              size: 40.0,
             ),
             SizedBox(
               width: 20.0,
@@ -50,10 +50,6 @@ class _FriendsListState extends State<FriendsList> {
             title: Text(
               user.visibleName,
             ),
-            /*trailing: SpinKitCubeGrid(
-              color: user.lan ? Colors.green[900] : Colors.cyan[800],
-              size: 20.0,
-            ),*/
             trailing: Icon(
               Icons.supervised_user_circle_rounded,
               color: user.lan ? Colors.green[900] : Colors.cyan[800],
@@ -71,7 +67,7 @@ class _FriendsListState extends State<FriendsList> {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: CachedNetworkImageProvider(
-                  'https://wtf-dev.ru/sync/login/img/back.jpg',
+                  'https://wtf-dev.ru/udp.jpg',
                 ),
                 fit: BoxFit.cover,
               ),

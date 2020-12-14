@@ -81,6 +81,8 @@ class _FriendlyChatAppState extends State<FriendlyChatApp>
           theme: ThemeData(
               fontFamily: 'Montserrat',
               brightness: Brightness.dark,
+              backgroundColor: Color(0xff0e151b),
+              scaffoldBackgroundColor: Color(0xff0e151b),
               accentColor: Colors.amber,
               colorScheme: ColorScheme.dark()),
           title: 'UDP chat',

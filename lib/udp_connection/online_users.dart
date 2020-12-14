@@ -13,9 +13,20 @@ class OnlineUsers {
     return _instance;
   }
 
-  StreamController<List<User>>
-      _streamOnline; // = _generateStream();//StreamController<List<User>>(sync: false);
+  List<UserMessage> _messagesList = [];
+  StreamController<List<UserMessage>> _messagesStream =
+      StreamController.broadcast(sync: false);
+
   List<User> _lastUsersList = [];
+  StreamController<List<User>> _streamOnline;
+
+  List<UserMessage> getMessages(String userId) {
+    return _messagesList
+        .where((element) => (element.from == userId || element.to == userId))
+        .toList();
+  }
+
+  Stream<List<UserMessage>> getMessagesStream() => _messagesStream.stream;
 
   List<User> getList() => _lastUsersList;
 

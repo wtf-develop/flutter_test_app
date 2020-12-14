@@ -102,3 +102,23 @@ Map<String, dynamic> _$MyContactsListToJson(MyContactsList instance) =>
     <String, dynamic>{
       'a': instance.contacts,
     };
+
+UserMessage _$UserMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, requiredKeys: const ['f', 't', 'm']);
+  return UserMessage(
+    json['f'] as String ?? '',
+    json['t'] as String ?? '',
+    json['m'] as String ?? '',
+    json['c'] as int ?? 0,
+    json['s'] as int ?? 0,
+  );
+}
+
+Map<String, dynamic> _$UserMessageToJson(UserMessage instance) =>
+    <String, dynamic>{
+      'f': instance.from,
+      't': instance.to,
+      'm': instance.message,
+      'c': instance.created,
+      's': instance.status,
+    };

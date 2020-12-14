@@ -95,4 +95,15 @@ class UdpRepository {
             .codeUnits,
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
+
+  Future<int> sendMessage2User(
+      String my_uid, String toUser, String message, String ip, int port) {
+    return _local_server.send(
+        ("M" +
+                jsonEncode(UserMessage(my_uid, toUser, message,
+                        DateTime.now().millisecondsSinceEpoch, 0)
+                    .toJson()))
+            .codeUnits,
+        Endpoint.unicast(InternetAddress(ip), port: Port(port)));
+  }
 }

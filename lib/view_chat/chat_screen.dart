@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 import 'message_row.dart';
@@ -105,20 +106,27 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[900],
-        title: Flexible(
-          child: Row(
-            children: [
-              Container(
-                child: Icon(Icons.chat_bubble_outline),
-                padding: EdgeInsets.only(right: 15.0),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: SpinKitWanderingCubes(
+                color: Theme.of(context).accentColor,
+                size: 25.0,
+                duration: Duration(seconds: 5),
               ),
-              Expanded(
-                  child: Text(
-                data['id'] + ' Chat',
-                overflow: TextOverflow.fade,
-              )),
-            ],
-          ),
+            ),
+            SizedBox(
+              width: 20.0,
+            ),
+            Expanded(
+                child: Text(
+              data['id'],
+              overflow: TextOverflow.fade,
+            )),
+          ],
         ),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 1.5 : 1.5,
       ),
@@ -128,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: CachedNetworkImageProvider(
-                  'https://wtf-dev.ru/sync/login/img/back.jpg',
+                  'https://wtf-dev.ru/udp.jpg',
                 ),
                 fit: BoxFit.cover,
               ),
