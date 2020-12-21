@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -21,16 +22,26 @@ class ChatModel extends ChangeNotifier {
 
   String _userId;
 
-  void setId(String id) {
-    _userId = id;
-  }
 
-  void getMessages() {
+  StreamSubscription<UserMessage> _current_subscription;
+  void getMessages(String id) {
+    _userId = id;
     _messages.addAll(_repo.getMessages(_userId));
-    _repo.subscribeMessage(_localStorage.getMyUniqId(),_userId).listen((message) {
+    if(_current_subscription!=null){
+      _current_subscription.cancel();
+    }
+    _current_subscription=_repo.subscribeMessage(_localStorage.getMyUniqId(),_userId).listen((message) {
       _messages.insert(0, message);
       notifyListeners();
     });
+  }
+
+  void closeSubscription(){
+    if(_current_subscription!=null){
+      _current_subscription.cancel();
+    }
+    _current_subscription=null;
+
   }
 
   LocalStorage _localStorage = LocalStorage();

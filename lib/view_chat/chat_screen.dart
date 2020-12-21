@@ -97,6 +97,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       MessageRow message = _view_messages[index];
       message.animationController.dispose();
     }
+    Provider.of<ChatModel>(context, listen: false).closeSubscription();
     super.dispose();
   }
 
@@ -104,8 +105,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (data == null) {
       data = ModalRoute.of(context).settings.arguments;
-      Provider.of<ChatModel>(context, listen: false).setId(data['id']);
-      Provider.of<ChatModel>(context, listen: false).getMessages();
+      Provider.of<ChatModel>(context, listen: false).getMessages(data['id']);
     }
 
     return Scaffold(
