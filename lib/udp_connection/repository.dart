@@ -64,6 +64,7 @@ class UdpRepository {
       dev.log("Server myself");
     } else {
       dev.log("Server");
+      //todo ad to list if LAN
     }
 
     return _local_server.send(
