@@ -30,15 +30,12 @@ class UdpModel {
         _localStorage.getMyUniqId(), _localStorage.getContacts().getIdsOnly());
   }
 
-  Future<List<String>> getMessages() {
-    return Future.delayed(Duration(milliseconds: 3000)).then((value) {
-      return List<String>.generate(10, (i) => ("Message" + i.toString()));
-    });
+  List<UserMessage> getMessages(String userId) {
+    return _lastUsersObject.getMessages(_localStorage.getMyUniqId(), userId);
   }
 
   var _serverOnline = false;
   Timer _timer;
-
 
   startServer() {
     _localStorage.init().then((_) {
@@ -64,16 +61,21 @@ class UdpModel {
     return _lastUsersObject.getStream();
   }
 
-  void sendMessage(UserMessage mess){
-    var user=_getUserById(mess.to);
-    if(user.port>0) {
-      _repo.sendMessage2User(mess.from, mess.to, mess.message, user.ipv4, user.port);
+  void sendMessage(UserMessage mess) {
+    var user = _getUserById(mess.to);
+    if (user.port > 0) {
+      _repo.sendMessage2User(
+          mess.from, mess.to, mess.message, user.ipv4, user.port);
     }
   }
 
-  User _getUserById(String id){
-    return _lastUsersObject.getList().firstWhere((element) => element.id==id,orElse: ()=>User("","","",0));
+  Stream<UserMessage> getMessageStream() {
+    return _lastUsersObject.getMessagesStream();
+  }
 
+  User _getUserById(String id) {
+    return _lastUsersObject.getList().firstWhere((element) => element.id == id,
+        orElse: () => User("", "", "", 0));
   }
 
   Future<void> _internal_startServer() async {
@@ -100,7 +102,7 @@ class UdpModel {
     //while (_serverOnline) {
     unawaited(_repo.getConnection().listen((datagram) {
       if (_localStorage.getMyUniqId().length < 10) return;
-      var str = String.fromCharCodes(datagram.data);
+      var str = utf8.decode(datagram.data);//String.fromCharCodes(datagram.data);
       dev.log(datagram.address.toString() + str);
       Map response = jsonDecode(str.substring(1));
 
@@ -112,6 +114,9 @@ class UdpModel {
       } else if (str.startsWith("U{")) {
         // we receive a list of online devices here
         _processUsersResponse(_localStorage.getMyUniqId(), datagram, response);
+      } else if (str.startsWith("M{")) {
+        //Message from another device
+        _processMessages(UserMessage.fromJson(response));
       } else if (str.startsWith("D{")) {
         // we receive message that online user disable application
         var ids = IdsRequest.fromJson(response);
@@ -122,6 +127,10 @@ class UdpModel {
     return Future.value();
   }
 
+
+  void _processMessages(UserMessage m){
+    _lastUsersObject.addMessage(m.from, m.to, m.message);
+  }
   void _processUsersResponse(
       String my_uid, Datagram datagram, Map<dynamic, dynamic> response) {
     // We receive response from server with list of online users

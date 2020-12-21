@@ -18,9 +18,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final FocusNode _focusNode = FocusNode();
 
   Map data;
+
   void _handleSubmitted(String text, ChatModel chat) {
     _textController.clear();
-    chat.add(data['id'], text);
+    chat.add(text);
     _focusNode.requestFocus();
   }
 
@@ -85,9 +86,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   ChatModel chatModel;
+
   void initState() {
     super.initState();
-    Provider.of<ChatModel>(context, listen: false).getMessages();
   }
 
   @override
@@ -101,7 +102,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (data == null) data = ModalRoute.of(context).settings.arguments;
+    if (data == null) {
+      data = ModalRoute.of(context).settings.arguments;
+      Provider.of<ChatModel>(context, listen: false).setId(data['id']);
+      Provider.of<ChatModel>(context, listen: false).getMessages();
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[900],

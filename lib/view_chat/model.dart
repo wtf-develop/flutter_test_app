@@ -19,20 +19,25 @@ class ChatModel extends ChangeNotifier {
 
   UserMessage getOneMessage(int index) => _messages[index];
 
+  String _userId;
+
+  void setId(String id) {
+    _userId = id;
+  }
+
   void getMessages() {
-    _repo.getMessages().then((value) {
-      value.forEach((element) {
-        _messages.add(UserMessage("Other", "to", element, 0, 0));
-      });
+    _messages.addAll(_repo.getMessages(_userId));
+    _repo.subscribeMessage(_localStorage.getMyUniqId(),_userId).listen((message) {
+      _messages.insert(0, message);
       notifyListeners();
     });
   }
 
   LocalStorage _localStorage = LocalStorage();
 
-  void add(String to, String message) {
+  void add(String message) {
     var userMessage =
-        UserMessage(_localStorage.getMyUniqId(), to, message, 0, 0);
+        UserMessage(_localStorage.getMyUniqId(), _userId, message, 0, 0);
     _messages.insert(0, userMessage);
     _repo.sendMessage(userMessage);
     _canSend = false;

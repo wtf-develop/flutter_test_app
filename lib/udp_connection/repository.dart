@@ -25,9 +25,9 @@ class UdpRepository {
     _local_server = null;
   }
 
-  Future openConnection() async {
+  Future openConnection() {
     if (_local_server != null) {
-      return;
+      return Future.value();
     }
     return UDP
         .bind(Endpoint.any(port: Port(_SERVER_PORT)))
@@ -45,14 +45,14 @@ class UdpRepository {
       if (value.length > 0) {
         IdsRequest ids = IdsRequest(my_uid, ids_list);
         _local_server?.send(
-            ("L" + jsonEncode(ids.toJson())).codeUnits,
+            utf8.encode("L" + jsonEncode(ids.toJson())),
             Endpoint.unicast(value[_rnd.nextInt(value.length) % value.length],
                 port: Port(_SERVER_PORT)));
       }
     });
 
     IdsRequest ids = IdsRequest(my_uid, []);
-    _local_server?.send(("L" + jsonEncode(ids.toJson())).codeUnits,
+    _local_server?.send(utf8.encode("L" + jsonEncode(ids.toJson())),
         Endpoint.broadcast(port: Port(_SERVER_PORT)));
   }
 
@@ -67,43 +67,40 @@ class UdpRepository {
     }
 
     return _local_server.send(
-        ("U" +
-                jsonEncode((UsersList(my_uid, [User(my_nick, my_uid, "", 0)]))
-                    .toJson()))
-            .codeUnits,
+        utf8.encode("U" +
+            jsonEncode(
+                (UsersList(my_uid, [User(my_nick, my_uid, "", 0)])).toJson())),
         Endpoint.unicast(address, port: Port(port)));
   }
 
   Future<int> sendListRequest(String my_uid, String ip, int port) {
     IdsRequest ids = IdsRequest(my_uid, []);
-    return _local_server.send(("L" + jsonEncode(ids.toJson())).codeUnits,
+    return _local_server.send(utf8.encode("L" + jsonEncode(ids.toJson())),
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
 
   Future<int> sendClosedSignal(String my_uid, String ip, int port) {
     IdsRequest ids = IdsRequest(my_uid, []);
-    return _local_server.send(("D" + jsonEncode(ids.toJson())).codeUnits,
+    return _local_server.send(utf8.encode("D" + jsonEncode(ids.toJson())),
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
 
   Future<int> sendOpenSignal(
       String my_uid, String my_nick, String ip, int port) {
     return _local_server.send(
-        ("U" +
-                jsonEncode((UsersList(my_uid, [User(my_nick, my_uid, "", 0)]))
-                    .toJson()))
-            .codeUnits,
+        utf8.encode("U" +
+            jsonEncode((UsersList(my_uid, [User(my_nick, my_uid, "", 0)]))
+                .toJson())), //.codeUnits,
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
 
   Future<int> sendMessage2User(
       String my_uid, String toUser, String message, String ip, int port) {
     return _local_server.send(
-        ("M" +
-                jsonEncode(UserMessage(my_uid, toUser, message,
-                        DateTime.now().millisecondsSinceEpoch, 0)
-                    .toJson()))
-            .codeUnits,
+        utf8.encode("M" +
+            jsonEncode(UserMessage(my_uid, toUser, message,
+                    DateTime.now().millisecondsSinceEpoch, 0)
+                .toJson())),
         Endpoint.unicast(InternetAddress(ip), port: Port(port)));
   }
 }

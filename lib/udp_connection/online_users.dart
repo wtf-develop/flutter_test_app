@@ -14,19 +14,20 @@ class OnlineUsers {
   }
 
   List<UserMessage> _messagesList = [];
-  StreamController<List<UserMessage>> _messagesStream =
+  StreamController<UserMessage> _messagesStream =
       StreamController.broadcast(sync: false);
 
   List<User> _lastUsersList = [];
   StreamController<List<User>> _streamOnline;
 
-  List<UserMessage> getMessages(String userId) {
+  List<UserMessage> getMessages(String myId, String userId) {
     return _messagesList
-        .where((element) => (element.from == userId || element.to == userId))
+        .where((element) => ((element.from == userId || element.to == myId) ||
+            (element.to == userId || element.from == myId)))
         .toList();
   }
 
-  Stream<List<UserMessage>> getMessagesStream() => _messagesStream.stream;
+  Stream<UserMessage> getMessagesStream() => _messagesStream.stream;
 
   List<User> getList() => _lastUsersList;
 
@@ -60,6 +61,10 @@ class OnlineUsers {
       _add(users[i]);
     }
     _streamOnline?.add(_lastUsersList);
+  }
+
+  void addMessage(String from, String to,String mess){
+    _messagesStream?.add(UserMessage(from, to, mess, 0, 0));
   }
 
   void _add(User user) {
